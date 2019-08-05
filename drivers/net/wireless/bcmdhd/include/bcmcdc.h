@@ -4,7 +4,7 @@
  *
  * Definitions subject to change without notice.
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -24,11 +24,14 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: bcmcdc.h 318308 2012-03-02 02:23:42Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: bcmcdc.h 676811 2016-12-24 20:48:46Z $
  */
 #ifndef _bcmcdc_h_
 #define	_bcmcdc_h_
-#include <proto/ethernet.h>
+#include <ethernet.h>
 
 typedef struct cdc_ioctl {
 	uint32 cmd;      /* ioctl command value */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -18,11 +18,18 @@
  *      Notwithstanding the above, under no circumstances may you combine this
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
- * $Id: typedefs.h 453696 2014-02-06 01:10:20Z $
+ *
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: typedefs.h 639587 2016-05-24 06:44:44Z $
  */
 
 #ifndef _TYPEDEFS_H_
 #define _TYPEDEFS_H_
+
+#if (!defined(EDK_RELEASE_VERSION) || (EDK_RELEASE_VERSION < 0x00020000)) || \
+	!defined(BWL_NO_INTERNAL_STDLIB_SUPPORT)
 
 #ifdef SITE_TYPEDEFS
 
@@ -73,6 +80,9 @@ typedef unsigned long long int uintptr;
 
 
 
+/* float_t types conflict with the same typedefs from the standard ANSI-C
+** math.h header file. Don't re-typedef them here.
+*/
 
 #if defined(_NEED_SIZE_T_)
 typedef long unsigned int size_t;
@@ -86,7 +96,6 @@ typedef long unsigned int size_t;
 #define TYPEDEF_ULONG
 #endif
 
-
 /*
  * If this is either a Linux hybrid build or the per-port code of a hybrid build
  * then use the Linux header files to get some of the typedefs.  Otherwise, define
@@ -94,7 +103,6 @@ typedef long unsigned int size_t;
  * a duplicate typedef error; there is no way to "undefine" a typedef.
  * We know when it's per-port code because each file defines LINUX_PORT at the top.
  */
-#if !defined(LINUX_HYBRID) || defined(LINUX_PORT)
 #define TYPEDEF_UINT
 #ifndef TARGETENV_android
 #define TYPEDEF_USHORT
@@ -113,9 +121,6 @@ typedef long unsigned int size_t;
 #endif
 #endif	/* == 2.6.18 */
 #endif	/* __KERNEL__ */
-#endif  /* !defined(LINUX_HYBRID) || defined(LINUX_PORT) */
-
-
 
 
 /* Do not support the (u)int64 types with strict ansi for GNU C */
@@ -143,19 +148,15 @@ typedef long unsigned int size_t;
 #if defined(__KERNEL__)
 
 /* See note above */
-#if !defined(LINUX_HYBRID) || defined(LINUX_PORT)
 #include <linux/types.h>	/* sys/types.h and linux/types.h are oil and water */
-#endif /* !defined(LINUX_HYBRID) || defined(LINUX_PORT) */
 
 #else
-
 
 #include <sys/types.h>
 
 #endif /* linux && __KERNEL__ */
 
 #endif 
-
 
 
 /* use the default typedefs in the next section of this file */
@@ -173,7 +174,7 @@ typedef long unsigned int size_t;
 
 #ifndef TYPEDEF_BOOL
 typedef	/* @abstract@ */ unsigned char	bool;
-#endif
+#endif /* endif TYPEDEF_BOOL */
 
 /* define uchar, ushort, uint, ulong */
 
@@ -335,6 +336,47 @@ typedef float64 float_t;
 
 /* Avoid warning for discarded const or volatile qualifier in special cases (-Wcast-qual) */
 #define DISCARD_QUAL(ptr, type) ((type *)(uintptr)(ptr))
+
+#else
+
+#include <sys/types.h>
+#include <strings.h>
+#include <stdlib.h>
+
+#ifdef stderr
+#undef stderr
+#define stderr stdout
+#endif
+
+typedef UINT32  uint;
+typedef UINT64  ulong;
+typedef UINT16  ushort;
+typedef UINT8   uint8;
+typedef UINT16  uint16;
+typedef UINT32  uint32;
+typedef UINT64  uint64;
+typedef INT8    int8;
+typedef INT16   int16;
+typedef INT32   int32;
+typedef INT64   int64;
+
+typedef BOOLEAN       bool;
+typedef unsigned char uchar;
+typedef UINTN         uintptr;
+
+typedef UINT8   u_char;
+typedef UINT16  u_short;
+typedef UINTN   u_int;
+typedef ULONGN  u_long;
+
+#define UNUSED_PARAMETER(x) (void)(x)
+#define DISCARD_QUAL(ptr, type) ((type *)(uintptr)(ptr))
+#define INLINE
+#define	AUTO	(-1) /* Auto = -1 */
+#define	ON	1  /* ON = 1 */
+#define	OFF	0
+
+#endif /* !EDK_RELEASE_VERSION || (EDK_RELEASE_VERSION < 0x00020000) */
 
 /*
  * Including the bcmdefs.h here, to make sure everyone including typedefs.h

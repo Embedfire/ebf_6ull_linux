@@ -1,7 +1,7 @@
 /*
  * Misc system wide definitions
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -21,7 +21,10 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: bcmdefs.h 433011 2013-10-30 09:19:54Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: bcmdefs.h 657791 2016-09-02 15:14:42Z $
  */
 
 #ifndef	_bcmdefs_h_
@@ -60,23 +63,82 @@
  * BCMATTACHFN is also used for detach functions (it's not worth having a BCMDETACHFN,
  * as in most cases, the attach function calls the detach function to clean up on error).
  */
+#if defined(BCM_RECLAIM)
 
-#define bcmreclaimed 		0
+extern bool bcm_reclaimed;
+extern bool bcm_attach_part_reclaimed;
+extern bool bcm_preattach_part_reclaimed;
+
+#if defined(BCM_RECLAIM_ATTACH_FN_DATA)
+#define _data	__attribute__ ((__section__ (".dataini2." #_data))) _data
+#define _fn	__attribute__ ((__section__ (".textini2." #_fn), noinline)) _fn
+
+/* Relocate attach symbols to save-restore region to increase pre-reclaim heap size. */
+#define BCM_SRM_ATTACH_DATA(_data)    __attribute__ ((__section__ (".datasrm." #_data))) _data
+#define BCM_SRM_ATTACH_FN(_fn)        __attribute__ ((__section__ (".textsrm." #_fn), noinline)) _fn
+
+#ifndef PREATTACH_NORECLAIM
+#define BCMPREATTACHDATA(_data)	__attribute__ ((__section__ (".dataini3." #_data))) _data
+#define BCMPREATTACHFN(_fn)	__attribute__ ((__section__ (".textini3." #_fn), noinline)) _fn
+#else
+#define BCMPREATTACHDATA(_data)	__attribute__ ((__section__ (".dataini2." #_data))) _data
+#define BCMPREATTACHFN(_fn)	__attribute__ ((__section__ (".textini2." #_fn), noinline)) _fn
+#endif /* PREATTACH_NORECLAIM  */
+#else  /* BCM_RECLAIM_ATTACH_FN_DATA  */
 #define _data	_data
 #define _fn	_fn
 #define BCMPREATTACHDATA(_data)	_data
 #define BCMPREATTACHFN(_fn)	_fn
+#endif /* BCM_RECLAIM_ATTACH_FN_DATA  */
+
+#if defined(BCM_RECLAIM_INIT_FN_DATA)
+#define _data	__attribute__ ((__section__ (".dataini1." #_data))) _data
+#define _fn		__attribute__ ((__section__ (".textini1." #_fn), noinline)) _fn
+#define CONST
+#else /* BCM_RECLAIM_INIT_FN_DATA  */
 #define _data	_data
 #define _fn		_fn
-#define _fn	_fn
+#ifndef CONST
+#define CONST	const
+#endif
+#endif /* BCM_RECLAIM_INIT_FN_DATA  */
+
+/* Non-manufacture or internal attach function/dat */
 #define	BCMNMIATTACHFN(_fn)	_fn
 #define	BCMNMIATTACHDATA(_data)	_data
-#define CONST	const
 
+#ifdef BCMNODOWN
+#define _fn	_fn
+#else
+#define _fn	_fn
+#endif
+
+#else /* BCM_RECLAIM */
+
+#define bcm_reclaimed           	0
+#define _data		_data
+#define _fn		_fn
+#define BCM_SRM_ATTACH_DATA(_data)	_data
+#define BCM_SRM_ATTACH_FN(_fn)		_fn
+#define BCMPREATTACHDATA(_data)		_data
+#define BCMPREATTACHFN(_fn)		_fn
+#define _data		_data
+#define _fn			_fn
+#define _fn		_fn
+#define	BCMNMIATTACHFN(_fn)		_fn
+#define	BCMNMIATTACHDATA(_data)		_data
+#define CONST				const
+
+#endif /* BCM_RECLAIM */
+
+#if !defined STB
 #undef BCM47XX_CA9
+#endif /* STB */
 
+/* BCMFASTPATH Related Macro defines
+*/
 #ifndef BCMFASTPATH
-#if defined(BCM47XX_CA9)
+#if defined(STB)
 #define BCMFASTPATH		__attribute__ ((__section__ (".text.fastpath")))
 #define BCMFASTPATH_HOST	__attribute__ ((__section__ (".text.fastpath_host")))
 #else
@@ -93,18 +155,7 @@
  */
 	#define BCMRAMFN(_fn)	_fn
 
-
-
-/* Put some library data/code into ROM to reduce RAM requirements */
-#define _data	_data
-#define BCMROMDAT_NAME(_data)	_data
-#define _fn		_fn
-#define _fn	_fn
 #define STATIC	static
-#define BCMROMDAT_ARYSIZ(data)	ARRAYSIZE(data)
-#define BCMROMDAT_SIZEOF(data)	sizeof(data)
-#define BCMROMDAT_APATCH(data)
-#define BCMROMDAT_SPATCH(data)
 
 /* Bus types */
 #define	SI_BUS			0	/* SOC Interconnect */
@@ -118,16 +169,22 @@
 
 /* Allows size optimization for single-bus image */
 #ifdef BCMBUSTYPE
-#define BUSTYPE(bus) 	(BCMBUSTYPE)
+#define BUSTYPE(bus)	(BCMBUSTYPE)
 #else
-#define BUSTYPE(bus) 	(bus)
+#define BUSTYPE(bus)	(bus)
+#endif
+
+#ifdef BCMBUSCORETYPE
+#define BUSCORETYPE(ct)		(BCMBUSCORETYPE)
+#else
+#define BUSCORETYPE(ct)		(ct)
 #endif
 
 /* Allows size optimization for single-backplane image */
 #ifdef BCMCHIPTYPE
-#define CHIPTYPE(bus) 	(BCMCHIPTYPE)
+#define CHIPTYPE(bus)	(BCMCHIPTYPE)
 #else
-#define CHIPTYPE(bus) 	(bus)
+#define CHIPTYPE(bus)	(bus)
 #endif
 
 
@@ -153,11 +210,37 @@
 #define CHIPREV(rev)	(rev)
 #endif
 
+#ifdef BCMPCIEREV
+#define PCIECOREREV(rev)	(BCMPCIEREV)
+#else
+#define PCIECOREREV(rev)	(rev)
+#endif
+
+#ifdef BCMPMUREV
+#define PMUREV(rev)	(BCMPMUREV)
+#else
+#define PMUREV(rev)	(rev)
+#endif
+
+#ifdef BCMCCREV
+#define CCREV(rev)	(BCMCCREV)
+#else
+#define CCREV(rev)	(rev)
+#endif
+
+#ifdef BCMGCIREV
+#define GCIREV(rev)	(BCMGCIREV)
+#else
+#define GCIREV(rev)	(rev)
+#endif
+
 /* Defines for DMA Address Width - Shared between OSL and HNDDMA */
 #define DMADDR_MASK_32 0x0		/* Address mask for 32-bits */
 #define DMADDR_MASK_30 0xc0000000	/* Address mask for 30-bits */
+#define DMADDR_MASK_26 0xFC000000	/* Address maks for 26-bits */
 #define DMADDR_MASK_0  0xffffffff	/* Address mask for 0-bits (hi-part) */
 
+#define	DMADDRWIDTH_26  26 /* 26-bit addressing capability */
 #define	DMADDRWIDTH_30  30 /* 30-bit addressing capability */
 #define	DMADDRWIDTH_32  32 /* 32-bit addressing capability */
 #define	DMADDRWIDTH_63  63 /* 64-bit addressing capability */
@@ -185,6 +268,10 @@ typedef dma64addr_t dmaaddr_t;
 #define PHYSADDRHISET(_pa, _val) PHYSADDR64HISET(_pa, _val)
 #define PHYSADDRLO(_pa)  PHYSADDR64LO(_pa)
 #define PHYSADDRLOSET(_pa, _val) PHYSADDR64LOSET(_pa, _val)
+#define PHYSADDRTOULONG(_pa, _ulong) \
+	do { \
+		_ulong = ((unsigned long long)(_pa).hiaddr << 32) | ((_pa).loaddr); \
+	} while (0)
 
 #else
 typedef unsigned long dmaaddr_t;
@@ -196,6 +283,7 @@ typedef unsigned long dmaaddr_t;
 		(_pa) = (_val);			\
 	} while (0)
 #endif /* BCMDMA64OSL */
+#define PHYSADDRISZERO(_pa) (PHYSADDRLO(_pa) == 0 && PHYSADDRHI(_pa) == 0)
 
 /* One physical DMA segment */
 typedef struct  {
@@ -224,11 +312,15 @@ typedef struct {
 /* add 40 bytes to allow for extra RPC header and info  */
 #define BCMEXTRAHDROOM 260
 #else /* BCM_RPC_NOCOPY || BCM_RPC_TXNOCOPY */
-#if defined(BCM47XX_CA9)
+#if defined(STB)
+#if defined(BCM_GMAC3)
+#define BCMEXTRAHDROOM 32 /* For FullDongle, no D11 headroom space required. */
+#else
 #define BCMEXTRAHDROOM 224
+#endif /* ! BCM_GMAC3 */
 #else
 #define BCMEXTRAHDROOM 204
-#endif /* linux && BCM47XX_CA9 */
+#endif 
 #endif /* BCM_RPC_NOCOPY || BCM_RPC_TXNOCOPY */
 
 /* Packet alignment for most efficient SDIO (can change based on platform) */
@@ -287,8 +379,13 @@ typedef struct {
 
 /* Max. nvram variable table size */
 #ifndef MAXSZ_NVRAM_VARS
-#define	MAXSZ_NVRAM_VARS	4096
-#endif
+#ifdef LARGE_NVRAM_MAXSZ
+#define MAXSZ_NVRAM_VARS	LARGE_NVRAM_MAXSZ
+#else
+/* SROM12 changes */
+#define	MAXSZ_NVRAM_VARS	6144
+#endif /* LARGE_NVRAM_MAXSZ */
+#endif /* !MAXSZ_NVRAM_VARS */
 
 
 
@@ -309,30 +406,22 @@ typedef struct {
 #else
 	#define BCMLFRAG_ENAB()		(0)
 #endif /* BCMLFRAG_ENAB */
-#ifdef BCMSPLITRX /* BCMLFRAG support enab macros  */
-	extern bool _bcmsplitrx;
-	#if defined(WL_ENAB_RUNTIME_CHECK) || !defined(DONGLEBUILD)
-		#define BCMSPLITRX_ENAB() (_bcmsplitrx)
-	#elif defined(BCMSPLITRX_DISABLED)
-		#define BCMSPLITRX_ENAB()	(0)
+
+#ifdef BCMPCIEDEV /* BCMPCIEDEV support enab macros */
+extern bool _pciedevenab;
+	#if defined(WL_ENAB_RUNTIME_CHECK)
+		#define BCMPCIEDEV_ENAB() (_pciedevenab)
+	#elif defined(BCMPCIEDEV_ENABLED)
+		#define BCMPCIEDEV_ENAB()	1
 	#else
-		#define BCMSPLITRX_ENAB()	(1)
+		#define BCMPCIEDEV_ENAB()	0
 	#endif
 #else
-	#define BCMSPLITRX_ENAB()		(0)
-#endif /* BCMSPLITRX */
-#ifdef BCM_SPLITBUF
-	extern bool _bcmsplitbuf;
-	#if defined(WL_ENAB_RUNTIME_CHECK) || !defined(DONGLEBUILD)
-		#define BCM_SPLITBUF_ENAB() (_bcmsplitbuf)
-	#elif defined(BCM_SPLITBUF_DISABLED)
-		#define BCM_SPLITBUF_ENAB()	(0)
-	#else
-		#define BCM_SPLITBUF_ENAB()	(1)
-	#endif
-#else
-	#define BCM_SPLITBUF_ENAB()		(0)
-#endif	/* BCM_SPLITBUF */
+	#define BCMPCIEDEV_ENAB()	0
+#endif /* BCMPCIEDEV */
+
+	#define BCMSDIODEV_ENAB()	0
+
 /* Max size for reclaimable NVRAM array */
 #ifdef DL_NVRAM
 #define NVRAM_ARRAY_MAXSIZE	DL_NVRAM
@@ -340,9 +429,34 @@ typedef struct {
 #define NVRAM_ARRAY_MAXSIZE	MAXSZ_NVRAM_VARS
 #endif /* DL_NVRAM */
 
-#ifdef BCMUSBDEV_ENABLED
 extern uint32 gFWID;
-#endif
 
+/* Chip related low power flags (lpflags) */
+#define LPFLAGS_SI_GLOBAL_DISABLE		(1 << 0)
+#define LPFLAGS_SI_MEM_STDBY_DISABLE		(1 << 1)
+#define LPFLAGS_SI_SFLASH_DISABLE		(1 << 2)
+#define LPFLAGS_SI_BTLDO3P3_DISABLE		(1 << 3)
+#define LPFLAGS_SI_GCI_FORCE_REGCLK_DISABLE	(1 << 4)
+#define LPFLAGS_SI_FORCE_PWM_WHEN_RADIO_ON (1 << 5)
+#define LPFLAGS_PHY_GLOBAL_DISABLE		(1 << 16)
+#define LPFLAGS_PHY_LP_DISABLE			(1 << 17)
+#define LPFLAGS_PSM_PHY_CTL			(1 << 18)
+
+/* Chip related Cbuck modes */
+#define PMU_43012_VREG8_DYNAMIC_CBUCK_MODE0 0x00001c03
+#define PMU_43012_VREG9_DYNAMIC_CBUCK_MODE0 0x00492490
+#define PMU_43012_VREG8_DYNAMIC_CBUCK_MODE1 0x00001c03
+#define PMU_43012_VREG9_DYNAMIC_CBUCK_MODE1 0x00490410
+
+/* Chip related dynamic cbuck mode mask */
+
+#define PMU_43012_VREG8_DYNAMIC_CBUCK_MODE_MASK  0xFFFFFC00
+#define PMU_43012_VREG9_DYNAMIC_CBUCK_MODE_MASK  0xFFFFFFFF
+
+#ifndef PAD
+#define _PADLINE(line)  pad ## line
+#define _XSTR(line)     _PADLINE(line)
+#define PAD             _XSTR(__LINE__)
+#endif
 
 #endif /* _bcmdefs_h_ */

@@ -18,9 +18,9 @@
 			compatible = "regulator-fixed";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
-			regulator-name = "wlreg_on";
-			gpio = <&gpio5 1 0>;
-			startup-delay-us = <100>;
+			regulator-name = "wlan-en-gpio";
+			gpio = <&gpio_spi 4 0>;
+			startup-delay-us = <20000>;
 			enable-active-high;
 		};
 	};
@@ -35,7 +35,7 @@
 	imx6ul-evk-murata-v2 {
 		pinctrl_wifi: wifigrp {
 			fsl,pins = <
-				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01 0x03029
+				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01 0x010B1
 			>;
 		};
 	};

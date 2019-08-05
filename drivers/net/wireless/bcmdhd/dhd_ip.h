@@ -3,7 +3,7 @@
  *
  * Provides type definitions and function prototypes used to parse ip packet.
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -23,7 +23,10 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: dhd_ip.h 457888 2014-02-25 03:34:39Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: dhd_ip.h 536854 2015-02-24 13:17:29Z $
  */
 
 #ifndef _dhd_ip_h_
@@ -57,12 +60,23 @@ extern pkt_frag_t pkt_frag_info(osl_t *osh, void *p);
 
 #define TCPDATA_INFO_TIMEOUT 5000	/* Remove tcpdata_info if inactive for this time (in ms) */
 
+#define DEFAULT_TCPACK_SUPP_RATIO 3
+#ifndef CUSTOM_TCPACK_SUPP_RATIO
+#define CUSTOM_TCPACK_SUPP_RATIO DEFAULT_TCPACK_SUPP_RATIO
+#endif /* CUSTOM_TCPACK_SUPP_RATIO */
+
+#define DEFAULT_TCPACK_DELAY_TIME 10 /* ms */
+#ifndef CUSTOM_TCPACK_DELAY_TIME
+#define CUSTOM_TCPACK_DELAY_TIME DEFAULT_TCPACK_DELAY_TIME
+#endif /* CUSTOM_TCPACK_DELAY_TIME */
+
 extern int dhd_tcpack_suppress_set(dhd_pub_t *dhdp, uint8 on);
 extern void dhd_tcpack_info_tbl_clean(dhd_pub_t *dhdp);
 extern int dhd_tcpack_check_xmit(dhd_pub_t *dhdp, void *pkt);
 extern bool dhd_tcpack_suppress(dhd_pub_t *dhdp, void *pkt);
 extern bool dhd_tcpdata_info_get(dhd_pub_t *dhdp, void *pkt);
-
+extern bool dhd_tcpack_hold(dhd_pub_t *dhdp, void *pkt, int ifidx);
+/* #define DHDTCPACK_SUP_DBG */
 #if defined(DEBUG_COUNTER) && defined(DHDTCPACK_SUP_DBG)
 extern counter_tbl_t tack_tbl;
 #endif /* DEBUG_COUNTER && DHDTCPACK_SUP_DBG */

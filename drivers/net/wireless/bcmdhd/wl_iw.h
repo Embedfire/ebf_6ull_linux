@@ -1,7 +1,7 @@
 /*
  * Linux Wireless Extensions support
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -21,7 +21,10 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: wl_iw.h 490106 2014-07-09 12:35:17Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: wl_iw.h 514727 2014-11-12 03:02:48Z $
  */
 
 #ifndef _wl_iw_h_
@@ -30,8 +33,10 @@
 #include <linux/wireless.h>
 
 #include <typedefs.h>
-#include <proto/ethernet.h>
+#include <ethernet.h>
 #include <wlioctl.h>
+#include <dngl_stats.h>
+#include <dhd.h>
 
 #define WL_SCAN_PARAMS_SSID_MAX 	10
 #define GET_SSID			"SSID="
@@ -54,17 +59,14 @@
 #define PNODEBUG_SET_CMD			"PNODEBUG"
 #define TXPOWER_SET_CMD			"TXPOWER"
 
+#define MAC2STR(a) (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]
+#define MACSTR "%02x:%02x:%02x:%02x:%02x:%02x"
 
 /* Structure to keep global parameters */
 typedef struct wl_iw_extra_params {
 	int 	target_channel; /* target channel */
 } wl_iw_extra_params_t;
 
-struct cntry_locales_custom {
-	char iso_abbrev[WLC_CNTRY_BUF_SZ];	/* ISO 3166-1 country abbreviation */
-	char custom_locale[WLC_CNTRY_BUF_SZ];	/* Custom firmware locale */
-	int32 custom_locale_rev;		/* Custom local revisin default -1 */
-};
 /* ============================================== */
 /* Defines from wlc_pub.h */
 #define	WL_IW_RSSI_MINVAL		-200	/* Low value, e.g. for forcing roam */
@@ -121,12 +123,24 @@ extern const struct iw_handler_def wl_iw_handler_def;
 #endif /* WIRELESS_EXT > 12 */
 
 extern int wl_iw_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
-extern void wl_iw_event(struct net_device *dev, wl_event_msg_t *e, void* data);
 extern int wl_iw_get_wireless_stats(struct net_device *dev, struct iw_statistics *wstats);
-int wl_iw_attach(struct net_device *dev, void * dhdp);
 int wl_iw_send_priv_event(struct net_device *dev, char *flag);
+#ifdef WL_ESCAN
+int wl_iw_handle_scanresults_ies(char **event_p, char *end,
+	struct iw_request_info *info, wl_bss_info_t *bi);
+#endif
+int wl_iw_attach(struct net_device *dev, dhd_pub_t *dhdp);
+void wl_iw_detach(struct net_device *dev, dhd_pub_t *dhdp);
+int wl_iw_up(struct net_device *dev, dhd_pub_t *dhdp);
+void wl_iw_down(dhd_pub_t *dhdp);
+s32 wl_iw_autochannel(struct net_device *dev, char* command, int total_len);
 
-void wl_iw_detach(void);
+/* message levels */
+#define WL_ERROR_LEVEL	(1 << 0)
+#define WL_TRACE_LEVEL	(1 << 1)
+#define WL_INFO_LEVEL	(1 << 2)
+#define WL_SCAN_LEVEL	(1 << 3)
+#define WL_WSEC_LEVEL	(1 << 4)
 
 #define CSCAN_COMMAND				"CSCAN "
 #define CSCAN_TLV_PREFIX 			'S'

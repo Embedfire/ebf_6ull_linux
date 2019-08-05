@@ -128,10 +128,10 @@ static void goodix_ts_report_touch(struct goodix_ts_data *ts, u8 *coor_data)
 
 	input_mt_slot(ts->input_dev, id);
 	input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, true);
-	input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_x);
-	input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_y);
-	input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, input_w);
-	input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, input_w);
+	input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_x/1);
+	input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_y/1);
+	input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, input_w/1);
+	input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, input_w/1);
 }
 
 /**
@@ -394,6 +394,7 @@ static const struct of_device_id goodix_of_match[] = {
 	{ .compatible = "goodix,gt9271" },
 	{ .compatible = "goodix,gt928" },
 	{ .compatible = "goodix,gt967" },
+	{ .compatible = "goodix,gt9157" },   /*pengjie add for gt9157*/
 	{ }
 };
 MODULE_DEVICE_TABLE(of, goodix_of_match);

@@ -1,7 +1,7 @@
 /*
  * DHD Protocol Module for CDC and BDC.
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -21,7 +21,10 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: dhd_cdc.c 557252 2015-05-18 08:55:13Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: dhd_cdc.c 699163 2017-05-12 05:18:23Z $
  *
  * BDC is like CDC, except it includes a header for data packets to convey
  * packet priority over the bus, and flags (e.g. to indicate checksum status
@@ -46,6 +49,13 @@
 #include <wlfc_proto.h>
 #include <dhd_wlfc.h>
 #endif
+#ifdef BCMDBUS
+#include <dhd_config.h>
+#endif /* BCMDBUS */
+
+#ifdef DHD_ULP
+#include <dhd_ulp.h>
+#endif /* DHD_ULP */
 
 
 #define RETRIES 2		/* # of retries to retrieve matching ioctl response */
@@ -61,15 +71,20 @@ typedef struct dhd_prot {
 	uint16 reqid;
 	uint8 pending;
 	uint32 lastcmd;
+#ifdef BCMDBUS
+	uint ctl_completed;
+#endif /* BCMDBUS */
 	uint8 bus_header[BUS_HEADER_LEN];
 	cdc_ioctl_t msg;
 	unsigned char buf[WLC_IOCTL_MAXLEN + ROUND_UP_MARGIN];
 } dhd_prot_t;
 
-
 static int
 dhdcdc_msg(dhd_pub_t *dhd)
 {
+#ifdef BCMDBUS
+	int timeout = 0;
+#endif /* BCMDBUS */
 	int err = 0;
 	dhd_prot_t *prot = dhd->prot;
 	int len = ltoh32(prot->msg.len) + sizeof(cdc_ioctl_t);
@@ -86,8 +101,51 @@ dhdcdc_msg(dhd_pub_t *dhd)
 		len = CDC_MAX_MSG_SIZE;
 
 	/* Send request */
+#ifdef BCMDBUS
+	DHD_OS_IOCTL_RESP_LOCK(dhd);
+	prot->ctl_completed = FALSE;
+	err = dbus_send_ctl(dhd->bus, (void *)&prot->msg, len);
+	if (err) {
+		DHD_ERROR(("dbus_send_ctl error=%d\n", err));
+		DHD_OS_IOCTL_RESP_UNLOCK(dhd);
+		DHD_OS_WAKE_UNLOCK(dhd);
+		return err;
+	}
+#else
 	err = dhd_bus_txctl(dhd->bus, (uchar*)&prot->msg, len);
+#endif /* BCMDBUS */
 
+#ifdef BCMDBUS
+	timeout = dhd_os_ioctl_resp_wait(dhd, &prot->ctl_completed, false);
+	if ((!timeout) || (!prot->ctl_completed)) {
+		DHD_ERROR(("Txctl timeout %d ctl_completed %d\n",
+			timeout, prot->ctl_completed));
+		DHD_ERROR(("Txctl wait timed out\n"));
+		err = -1;
+	}
+	DHD_OS_IOCTL_RESP_UNLOCK(dhd);
+#endif /* BCMDBUS */
+#if defined(BCMDBUS) && defined(INTR_EP_ENABLE)
+	/* If the ctl write is successfully completed, wait for an acknowledgement
+	* that indicates that it is now ok to do ctl read from the dongle
+	*/
+	if (err != -1) {
+		DHD_OS_IOCTL_RESP_LOCK(dhd);
+		prot->ctl_completed = FALSE;
+		if (dbus_poll_intr(dhd->dbus)) {
+			DHD_ERROR(("dbus_poll_intr not submitted\n"));
+		} else {
+			/* interrupt polling is sucessfully submitted. Wait for dongle to send
+			* interrupt
+			*/
+			timeout = dhd_os_ioctl_resp_wait(dhd, &prot->ctl_completed, false);
+			if (!timeout) {
+				DHD_ERROR(("intr poll wait timed out\n"));
+			}
+		}
+		DHD_OS_IOCTL_RESP_UNLOCK(dhd);
+	}
+#endif /* defined(BCMDBUS) && defined(INTR_EP_ENABLE) */
 	DHD_OS_WAKE_UNLOCK(dhd);
 	return err;
 }
@@ -95,20 +153,47 @@ dhdcdc_msg(dhd_pub_t *dhd)
 static int
 dhdcdc_cmplt(dhd_pub_t *dhd, uint32 id, uint32 len)
 {
+#ifdef BCMDBUS
+	int timeout = 0;
+#endif /* BCMDBUS */
 	int ret;
 	int cdc_len = len + sizeof(cdc_ioctl_t);
 	dhd_prot_t *prot = dhd->prot;
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
-
 	do {
+#ifdef BCMDBUS
+		DHD_OS_IOCTL_RESP_LOCK(dhd);
+		prot->ctl_completed = FALSE;
+		ret = dbus_recv_ctl(dhd->bus, (uchar*)&prot->msg, cdc_len);
+		if (ret) {
+			DHD_ERROR(("dbus_recv_ctl error=0x%x(%d)\n", ret, ret));
+			DHD_OS_IOCTL_RESP_UNLOCK(dhd);
+			goto done;
+		}
+		timeout = dhd_os_ioctl_resp_wait(dhd, &prot->ctl_completed, false);
+		if ((!timeout) || (!prot->ctl_completed)) {
+			DHD_ERROR(("Rxctl timeout %d ctl_completed %d\n",
+				timeout, prot->ctl_completed));
+			ret = -1;
+			DHD_OS_IOCTL_RESP_UNLOCK(dhd);
+
+			goto done;
+		}
+		DHD_OS_IOCTL_RESP_UNLOCK(dhd);
+
+		ret = cdc_len;
+#else
 		ret = dhd_bus_rxctl(dhd->bus, (uchar*)&prot->msg, cdc_len);
+#endif /* BCMDBUS */
 		if (ret < 0)
 			break;
 	} while (CDC_IOC_ID(ltoh32(prot->msg.flags)) != id);
 
-
+#ifdef BCMDBUS
+done:
+#endif /* BCMDBUS */
 	return ret;
 }
 
@@ -220,6 +305,10 @@ dhdcdc_set_ioctl(dhd_pub_t *dhd, int ifidx, uint cmd, void *buf, uint len, uint8
 		return -EIO;
 	}
 
+	if (cmd == WLC_SET_PM) {
+		DHD_TRACE_HW4(("%s: SET PM to %d\n", __FUNCTION__, buf ? *(char *)buf : 0));
+	}
+
 	memset(msg, 0, sizeof(cdc_ioctl_t));
 
 	msg->cmd = htol32(cmd);
@@ -233,6 +322,13 @@ dhdcdc_set_ioctl(dhd_pub_t *dhd, int ifidx, uint cmd, void *buf, uint len, uint8
 
 	if (buf)
 		memcpy(prot->buf, buf, len);
+
+#ifdef DHD_ULP
+	if (buf && (!strncmp(buf, "ulp", sizeof("ulp")))) {
+		/* force all the writes after this point to NOT to use cached sbwad value */
+		dhd_ulp_disable_cached_sbwad(dhd);
+	}
+#endif /* DHD_ULP */
 
 	if ((ret = dhdcdc_msg(dhd)) < 0) {
 		DHD_ERROR(("%s: dhdcdc_msg failed w/status %d\n", __FUNCTION__, ret));
@@ -252,6 +348,12 @@ dhdcdc_set_ioctl(dhd_pub_t *dhd, int ifidx, uint cmd, void *buf, uint len, uint8
 		goto done;
 	}
 
+#ifdef DHD_ULP
+	/* For ulp prototyping temporary */
+	if ((ret = dhd_ulp_check_ulp_request(dhd, buf)) < 0)
+		goto done;
+#endif /* DHD_ULP */
+
 	/* Check the ERROR flag */
 	if (flags & CDCF_IOC_ERROR)
 	{
@@ -264,6 +366,25 @@ done:
 	return ret;
 }
 
+#ifdef BCMDBUS
+int
+dhd_prot_ctl_complete(dhd_pub_t *dhd)
+{
+	dhd_prot_t *prot;
+
+	if (dhd == NULL)
+		return BCME_ERROR;
+
+	prot = dhd->prot;
+
+	ASSERT(prot);
+	DHD_OS_IOCTL_RESP_LOCK(dhd);
+	prot->ctl_completed = TRUE;
+	dhd_os_ioctl_resp_wake(dhd);
+	DHD_OS_IOCTL_RESP_UNLOCK(dhd);
+	return 0;
+}
+#endif /* BCMDBUS */
 
 int
 dhd_prot_ioctl(dhd_pub_t *dhd, int ifidx, wl_ioctl_t * ioc, void * buf, int len)
@@ -271,9 +392,11 @@ dhd_prot_ioctl(dhd_pub_t *dhd, int ifidx, wl_ioctl_t * ioc, void * buf, int len)
 	dhd_prot_t *prot = dhd->prot;
 	int ret = -1;
 	uint8 action;
+	static int error_cnt = 0;
 
 	if ((dhd->busstate == DHD_BUS_DOWN) || dhd->hang_was_sent) {
-		DHD_ERROR(("%s : bus is down. we have nothing to do\n", __FUNCTION__));
+		DHD_ERROR(("%s : bus is down. we have nothing to do - bs: %d, has: %d\n",
+				__FUNCTION__, dhd->busstate, dhd->hang_was_sent));
 		goto done;
 	}
 
@@ -289,7 +412,7 @@ dhd_prot_ioctl(dhd_pub_t *dhd, int ifidx, wl_ioctl_t * ioc, void * buf, int len)
 			ioc->cmd, (unsigned long)ioc->cmd, prot->lastcmd,
 			(unsigned long)prot->lastcmd));
 		if ((ioc->cmd == WLC_SET_VAR) || (ioc->cmd == WLC_GET_VAR)) {
-			DHD_TRACE(("iovar cmd=%s\n", (char*)buf));
+			DHD_TRACE(("iovar cmd=%s\n", buf ? (char*)buf : "\0"));
 		}
 		goto done;
 	}
@@ -304,6 +427,13 @@ dhd_prot_ioctl(dhd_pub_t *dhd, int ifidx, wl_ioctl_t * ioc, void * buf, int len)
 		if (ret > 0)
 			ioc->used = ret - sizeof(cdc_ioctl_t);
 	}
+	// terence 20130805: send hang event to wpa_supplicant
+	if (ret == -EIO) {
+		error_cnt++;
+		if (error_cnt > 2)
+			ret = -ETIMEDOUT;
+	} else
+		error_cnt = 0;
 
 	/* Too many programs assume ioctl() returns 0 on success */
 	if (ret >= 0)
@@ -340,6 +470,10 @@ dhd_prot_iovar_op(dhd_pub_t *dhdp, const char *name,
 void
 dhd_prot_dump(dhd_pub_t *dhdp, struct bcmstrbuf *strbuf)
 {
+	if (!dhdp || !dhdp->prot) {
+		return;
+	}
+
 	bcm_bprintf(strbuf, "Protocol CDC: reqid %d\n", dhdp->prot->reqid);
 #ifdef PROP_TXSTATUS
 	dhd_wlfc_dump(dhdp, strbuf);
@@ -378,6 +512,17 @@ dhd_prot_hdrpush(dhd_pub_t *dhd, int ifidx, void *PKTBUF)
 	BDC_SET_IF_IDX(h, ifidx);
 }
 #undef PKTBUF	/* Only defined in the above routine */
+
+uint
+dhd_prot_hdrlen(dhd_pub_t *dhd, void *PKTBUF)
+{
+	uint hdrlen = 0;
+#ifdef BDC
+	/* Length of BDC(+WLFC) headers pushed */
+	hdrlen = BDC_HEADER_LEN + (((struct bdc_header *)PKTBUF)->dataOffset * 4);
+#endif
+	return hdrlen;
+}
 
 int
 dhd_prot_hdrpull(dhd_pub_t *dhd, int *ifidx, void *pktbuf, uchar *reorder_buf_info,
@@ -441,6 +586,12 @@ dhd_prot_hdrpull(dhd_pub_t *dhd, int *ifidx, void *pktbuf, uchar *reorder_buf_in
 		dhd_wlfc_parse_header_info(dhd, pktbuf, (data_offset << 2),
 			reorder_buf_info, reorder_info_len);
 
+#ifdef BCMDBUS
+#ifndef DHD_WLFC_THREAD
+		dhd_wlfc_commit_packets(dhd,
+			(f_commitpkt_t)dhd_bus_txdata, dhd->bus, NULL, FALSE);
+#endif /* DHD_WLFC_THREAD */
+#endif /* BCMDBUS */
 	}
 #endif /* PROP_TXSTATUS */
 
@@ -475,9 +626,8 @@ dhd_prot_attach(dhd_pub_t *dhd)
 	return 0;
 
 fail:
-	if (cdc != NULL) {
-		DHD_OS_PREFREE(dhd, DHD_PREALLOC_PROT, cdc, sizeof(dhd_prot_t));
-	}
+	if (cdc != NULL)
+		DHD_OS_PREFREE(dhd, cdc, sizeof(dhd_prot_t));
 	return BCME_NOMEM;
 }
 
@@ -488,14 +638,15 @@ dhd_prot_detach(dhd_pub_t *dhd)
 #ifdef PROP_TXSTATUS
 	dhd_wlfc_deinit(dhd);
 #endif
-	DHD_OS_PREFREE(dhd, DHD_PREALLOC_PROT, dhd->prot, sizeof(dhd_prot_t));
+	DHD_OS_PREFREE(dhd, dhd->prot, sizeof(dhd_prot_t));
 	dhd->prot = NULL;
 }
 
 void
 dhd_prot_dstats(dhd_pub_t *dhd)
 {
-/* No stats from dongle added yet, copy bus stats */
+	/*  copy bus stats */
+
 	dhd->dstats.tx_packets = dhd->tx_packets;
 	dhd->dstats.tx_errors = dhd->tx_errors;
 	dhd->dstats.rx_packets = dhd->rx_packets;
@@ -506,27 +657,52 @@ dhd_prot_dstats(dhd_pub_t *dhd)
 }
 
 int
-dhd_prot_init(dhd_pub_t *dhd)
+dhd_sync_with_dongle(dhd_pub_t *dhd)
 {
 	int ret = 0;
 	wlc_rev_info_t revinfo;
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
+#ifdef DHD_FW_COREDUMP
+	/* Check the memdump capability */
+	dhd_get_memdump_info(dhd);
+#endif /* DHD_FW_COREDUMP */
+
+#ifdef BCMASSERT_LOG
+	dhd_get_assert_info(dhd);
+#endif /* BCMASSERT_LOG */
 
 	/* Get the device rev info */
 	memset(&revinfo, 0, sizeof(revinfo));
 	ret = dhd_wl_ioctl_cmd(dhd, WLC_GET_REVINFO, &revinfo, sizeof(revinfo), FALSE, 0);
 	if (ret < 0)
 		goto done;
+#if defined(BCMDBUS)
+	if (dhd_download_fw_on_driverload) {
+		dhd_conf_reset(dhd);
+		dhd_conf_set_chiprev(dhd, revinfo.chipnum, revinfo.chiprev);
+		dhd_conf_preinit(dhd);
+		dhd_conf_read_config(dhd, dhd->conf_path);
+	}
+#endif /* BCMDBUS */
 
 
+	DHD_SSSR_DUMP_INIT(dhd);
+
+	dhd_process_cid_mac(dhd, TRUE);
 	ret = dhd_preinit_ioctls(dhd);
+	dhd_process_cid_mac(dhd, FALSE);
 
 	/* Always assumes wl for now */
 	dhd->iswl = TRUE;
 
 done:
 	return ret;
+}
+
+int dhd_prot_init(dhd_pub_t *dhd)
+{
+	return BCME_OK;
 }
 
 void

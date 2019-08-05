@@ -1,27 +1,31 @@
 /*
-* Customer code to add GPIO control during WLAN start/stop
-* Copyright (C) 1999-2016, Broadcom Corporation
-* 
-*      Unless you and Broadcom execute a separate written software license
-* agreement governing use of this software, this software is licensed to you
-* under the terms of the GNU General Public License version 2 (the "GPL"),
-* available at http://www.broadcom.com/licenses/GPLv2.php, with the
-* following added to such license:
-* 
-*      As a special exception, the copyright holders of this software give you
-* permission to link this software with independent modules, and to copy and
-* distribute the resulting executable under terms of your choice, provided that
-* you also meet, for each linked independent module, the terms and conditions of
-* the license of that module.  An independent module is a module which is not
-* derived from this software.  The special exception does not apply to any
-* modifications of the software.
-* 
-*      Notwithstanding the above, under no circumstances may you combine this
-* software in any way with any other Broadcom software provided under a license
-* other than the GPL, without Broadcom's express prior written consent.
-*
-* $Id: dhd_custom_gpio.c 493803 2014-07-29 12:31:48Z $
-*/
+ * Customer code to add GPIO control during WLAN start/stop
+ *
+ * Copyright (C) 1999-2017, Broadcom Corporation
+ * 
+ *      Unless you and Broadcom execute a separate written software license
+ * agreement governing use of this software, this software is licensed to you
+ * under the terms of the GNU General Public License version 2 (the "GPL"),
+ * available at http://www.broadcom.com/licenses/GPLv2.php, with the
+ * following added to such license:
+ * 
+ *      As a special exception, the copyright holders of this software give you
+ * permission to link this software with independent modules, and to copy and
+ * distribute the resulting executable under terms of your choice, provided that
+ * you also meet, for each linked independent module, the terms and conditions of
+ * the license of that module.  An independent module is a module which is not
+ * derived from this software.  The special exception does not apply to any
+ * modifications of the software.
+ * 
+ *      Notwithstanding the above, under no circumstances may you combine this
+ * software in any way with any other Broadcom software provided under a license
+ * other than the GPL, without Broadcom's express prior written consent.
+ *
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: dhd_custom_gpio.c 664997 2016-10-14 11:56:35Z $
+ */
 
 #include <typedefs.h>
 #include <linuxver.h>
@@ -32,25 +36,15 @@
 #include <dhd_linux.h>
 
 #include <wlioctl.h>
-#include <wl_iw.h>
 
 #define WL_ERROR(x) printf x
 #define WL_TRACE(x)
-
-#if defined(CUSTOMER_HW2)
-
-
-#endif 
 
 #if defined(OOB_INTR_ONLY)
 
 #if defined(BCMLXSDMMC)
 extern int sdioh_mmc_irq(int irq);
 #endif /* (BCMLXSDMMC)  */
-
-#if defined(CUSTOMER_HW3)
-#include <mach/gpio.h>
-#endif
 
 /* Customer specific Host GPIO defintion  */
 static int dhd_oob_gpio_num = -1;
@@ -92,11 +86,6 @@ int dhd_customer_oob_irq_map(void *adapter, unsigned long *irq_flags_ptr)
 	WL_ERROR(("%s: customer specific Host GPIO number is (%d)\n",
 	         __FUNCTION__, dhd_oob_gpio_num));
 
-#if defined(CUSTOMER_HW3)
-	gpio_request(dhd_oob_gpio_num, "oob irq");
-	host_oob_irq = gpio_to_irq(dhd_oob_gpio_num);
-	gpio_direction_input(dhd_oob_gpio_num);
-#endif /* defined CUSTOMER_HW3 */
 #endif 
 
 	return (host_oob_irq);
@@ -256,16 +245,26 @@ const struct cntry_locales_custom translate_custom_table[] = {
 *  input : ISO 3166-1 country abbreviation
 *  output: customized cspec
 */
-void get_customized_country_code(void *adapter, char *country_iso_code, wl_country_t *cspec)
+void
+#ifdef CUSTOM_COUNTRY_CODE
+get_customized_country_code(void *adapter, char *country_iso_code,
+	wl_country_t *cspec, u32 flags)
+#else
+get_customized_country_code(void *adapter, char *country_iso_code, wl_country_t *cspec)
+#endif /* CUSTOM_COUNTRY_CODE */
 {
-#if defined(CUSTOMER_HW2) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 39))
+#if (defined(CUSTOMER_HW) || defined(CUSTOMER_HW2)) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 39))
 
 	struct cntry_locales_custom *cloc_ptr;
 
 	if (!cspec)
 		return;
-
+#ifdef CUSTOM_COUNTRY_CODE
+	cloc_ptr = wifi_platform_get_country_code(adapter, country_iso_code, flags);
+#else
 	cloc_ptr = wifi_platform_get_country_code(adapter, country_iso_code);
+#endif /* CUSTOM_COUNTRY_CODE */
+
 	if (cloc_ptr) {
 		strlcpy(cspec->ccode, cloc_ptr->custom_locale, WLC_CNTRY_BUF_SZ);
 		cspec->rev = cloc_ptr->custom_locale_rev;

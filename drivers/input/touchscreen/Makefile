@@ -87,3 +87,5 @@ obj-$(CONFIG_TOUCHSCREEN_SX8654)	+= sx8654.o
 obj-$(CONFIG_TOUCHSCREEN_TPS6507X)	+= tps6507x-ts.o
 obj-$(CONFIG_TOUCHSCREEN_CT36X_WLD)	+= vtl/
 obj-$(CONFIG_TOUCHSCREEN_ZFORCE)	+= zforce_ts.o
+
+obj-$(CONFIG_TOUCHSCREEN_GT9XX) += gt9xx/     # add by pengjie 0716

@@ -1,7 +1,7 @@
 /*
  * Expose some of the kernel scheduler routines
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -21,7 +21,10 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: dhd_linux_sched.c 457596 2014-02-24 02:24:14Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: dhd_linux_sched.c 514727 2014-11-12 03:02:48Z $
  */
 #include <linux/kernel.h>
 #include <linux/module.h>

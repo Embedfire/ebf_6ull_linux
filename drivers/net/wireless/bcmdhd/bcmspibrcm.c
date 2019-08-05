@@ -1,7 +1,7 @@
 /*
  * Broadcom BCMSDH to gSPI Protocol Conversion Layer
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -21,7 +21,10 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: bcmspibrcm.c 634247 2016-04-27 05:53:55Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: bcmspibrcm.c 611787 2016-01-12 06:07:27Z $
  */
 
 #define HSMODE
@@ -60,8 +63,6 @@
 #define GSPI_F3_RESP_DELAY		0
 
 #define CMDLEN		4
-
-#define DWORDMODE_ON (sd->chip == BCM4329_CHIP_ID) && (sd->chiprev == 2) && (sd->dwordmode == TRUE)
 
 /* Globals */
 #if defined(DHD_DEBUG)
@@ -199,13 +200,11 @@ extern SDIOH_API_RC
 sdioh_interrupt_register(sdioh_info_t *sd, sdioh_cb_fn_t fn, void *argh)
 {
 	sd_trace(("%s: Entering\n", __FUNCTION__));
-#if !defined(OOB_INTR_ONLY) || defined(OOB_PARAM)
-	OOB_PARAM_IF(dhd_oob_disable) {
-		sd->intr_handler = fn;
-		sd->intr_handler_arg = argh;
-		sd->intr_handler_valid = TRUE;
-	}
-#endif /* !defined(OOB_INTR_ONLY) || defined(OOB_PARAM) */
+#if !defined(OOB_INTR_ONLY)
+	sd->intr_handler = fn;
+	sd->intr_handler_arg = argh;
+	sd->intr_handler_valid = TRUE;
+#endif /* !defined(OOB_INTR_ONLY) */
 	return SDIOH_API_RC_SUCCESS;
 }
 
@@ -213,13 +212,11 @@ extern SDIOH_API_RC
 sdioh_interrupt_deregister(sdioh_info_t *sd)
 {
 	sd_trace(("%s: Entering\n", __FUNCTION__));
-#if !defined(OOB_INTR_ONLY) || defined(OOB_PARAM)
-	OOB_PARAM_IF(dhd_oob_disable) {
-		sd->intr_handler_valid = FALSE;
-		sd->intr_handler = NULL;
-		sd->intr_handler_arg = NULL;
-	}
-#endif /* !defined(OOB_INTR_ONLY) || defined(OOB_PARAM) */
+#if !defined(OOB_INTR_ONLY)
+	sd->intr_handler_valid = FALSE;
+	sd->intr_handler = NULL;
+	sd->intr_handler_arg = NULL;
+#endif /* !defined(OOB_INTR_ONLY) */
 	return SDIOH_API_RC_SUCCESS;
 }
 
@@ -238,13 +235,6 @@ sdioh_interrupt_pending(sdioh_info_t *sd)
 	return 0;
 }
 #endif
-
-extern SDIOH_API_RC
-sdioh_query_device(sdioh_info_t *sd)
-{
-	/* Return a BRCM ID appropriate to the dongle class */
-	return (sd->num_funcs > 1) ? BCM4329_D11N_ID : BCM4318_D11G_ID;
-}
 
 /* Provide dstatus bits of spi-transaction for dhd layers. */
 extern uint32
@@ -1287,8 +1277,14 @@ bcmspi_host_device_init_adapt(sdioh_info_t *sd)
 			OSL_DELAY(1000);
 		}
 
+#if defined(CHANGE_SPI_INTR_POLARITY_ACTIVE_HIGH)
+		/* Change to host controller intr-polarity of active-high */
+		wrregdata |= INTR_POLARITY;
+#else
 		/* Change to host controller intr-polarity of active-low */
 		wrregdata &= ~INTR_POLARITY;
+#endif /* CHANGE_SPI_INTR_POLARITY_ACTIVE_HIGH */
+
 		sd_trace(("(we are still in 16bit mode) 32bit Write LE reg-ctrl-data = 0x%x\n",
 		        wrregdata));
 		/* Change to 32bit mode */
@@ -1524,22 +1520,6 @@ bcmspi_cmd_issue(sdioh_info_t *sd, bool use_dma, uint32 cmd_arg,
 
 	sd_trace(("spi cmd = 0x%x\n", cmd_arg));
 
-	if (DWORDMODE_ON) {
-		spilen = GFIELD(cmd_arg, SPI_LEN);
-		if ((GFIELD(cmd_arg, SPI_FUNCTION) == SPI_FUNC_0) ||
-		    (GFIELD(cmd_arg, SPI_FUNCTION) == SPI_FUNC_1))
-			dstatus_idx = spilen * 3;
-
-		if ((GFIELD(cmd_arg, SPI_FUNCTION) == SPI_FUNC_2) &&
-		    (GFIELD(cmd_arg, SPI_RW_FLAG) == 1)) {
-			spilen = spilen << 2;
-			dstatus_idx = (spilen % 16) ? (16 - (spilen % 16)) : 0;
-			/* convert len to mod16 size */
-			spilen = ROUNDUP(spilen, 16);
-			cmd_arg = SFIELD(cmd_arg, SPI_LEN, (spilen >> 2));
-		}
-	}
-
 	/* Set up and issue the SPI command.  MSByte goes out on bus first.  Increase datalen
 	 * according to the wordlen mode(16/32bit) the device is in.
 	 */
@@ -1562,17 +1542,6 @@ bcmspi_cmd_issue(sdioh_info_t *sd, bool use_dma, uint32 cmd_arg,
 	/* for Write, put the data into the output buffer */
 	if (GFIELD(cmd_arg, SPI_RW_FLAG) == 1) {
 		/* We send len field of hw-header always a mod16 size, both from host and dongle */
-		if (DWORDMODE_ON) {
-			if (GFIELD(cmd_arg, SPI_FUNCTION) == SPI_FUNC_2) {
-				ptr = (uint16 *)&data[0];
-				templen = *ptr;
-				/* ASSERT(*ptr == ~*(ptr + 1)); */
-				templen = ROUNDUP(templen, 16);
-				*ptr = templen;
-				sd_trace(("actual tx len = %d\n", (uint16)(~*(ptr+1))));
-			}
-		}
-
 		if (datalen != 0) {
 			for (i = 0; i < datalen/4; i++) {
 				if (sd->wordlen == 4) { /* 32bit spid */
@@ -1635,25 +1604,6 @@ bcmspi_cmd_issue(sdioh_info_t *sd, bool use_dma, uint32 cmd_arg,
 					            CMDLEN + resp_delay]);
 				}
 			}
-
-			if ((DWORDMODE_ON) && (GFIELD(cmd_arg, SPI_FUNCTION) == SPI_FUNC_2)) {
-				ptr = (uint16 *)&data[0];
-				templen = *ptr;
-				buslen = len = ~(*(ptr + 1));
-				buslen = ROUNDUP(buslen, 16);
-				/* populate actual len in hw-header */
-				if (templen == buslen)
-					*ptr = len;
-			}
-		}
-	}
-
-	/* Restore back the len field of the hw header */
-	if (DWORDMODE_ON) {
-		if ((GFIELD(cmd_arg, SPI_FUNCTION) == SPI_FUNC_2) &&
-		    (GFIELD(cmd_arg, SPI_RW_FLAG) == 1)) {
-			ptr = (uint16 *)&data[0];
-			*ptr = (uint16)(~*(ptr+1));
 		}
 	}
 

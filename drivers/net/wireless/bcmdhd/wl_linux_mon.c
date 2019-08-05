@@ -1,7 +1,7 @@
 /*
  * Broadcom Dongle Host Driver (DHD), Linux monitor network interface
  *
- * Copyright (C) 1999-2016, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -21,7 +21,10 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: wl_linux_mon.c 425343 2013-09-23 23:04:47Z $
+ *
+ * <<Broadcom-WL-IPTag/Open:>>
+ *
+ * $Id: wl_linux_mon.c 576195 2015-08-01 18:21:54Z $
  */
 
 #include <osl.h>
@@ -47,7 +50,7 @@ typedef enum monitor_states
 	MONITOR_STATE_INTERFACE_ADDED = 0x2,
 	MONITOR_STATE_INTERFACE_DELETED = 0x4
 } monitor_states_t;
-int dhd_add_monitor(char *name, struct net_device **new_ndev);
+int dhd_add_monitor(const char *name, struct net_device **new_ndev);
 extern int dhd_start_xmit(struct sk_buff *skb, struct net_device *net);
 int dhd_del_monitor(struct net_device *ndev);
 int dhd_monitor_init(void *dhd_pub);
@@ -77,7 +80,7 @@ typedef struct dhd_linux_monitor {
 
 static dhd_linux_monitor_t g_monitor;
 
-static struct net_device* lookup_real_netdev(char *name);
+static struct net_device* lookup_real_netdev(const char *name);
 static monitor_interface* ndev_to_monif(struct net_device *ndev);
 static int dhd_mon_if_open(struct net_device *ndev);
 static int dhd_mon_if_stop(struct net_device *ndev);
@@ -104,7 +107,7 @@ static const struct net_device_ops dhd_mon_if_ops = {
 /* Look up dhd's net device table to find a match (e.g. interface "eth0" is a match for "mon.eth0"
  * "p2p-eth0-0" is a match for "mon.p2p-eth0-0")
  */
-static struct net_device* lookup_real_netdev(char *name)
+static struct net_device* lookup_real_netdev(const char *name)
 {
 	struct net_device *ndev_found = NULL;
 
@@ -277,7 +280,7 @@ static int dhd_mon_if_change_mac(struct net_device *ndev, void *addr)
  * Global function definitions (declared in dhd_linux_mon.h)
  */
 
-int dhd_add_monitor(char *name, struct net_device **new_ndev)
+int dhd_add_monitor(const char *name, struct net_device **new_ndev)
 {
 	int i;
 	int idx = -1;
@@ -385,8 +388,8 @@ int dhd_monitor_uninit(void)
 {
 	int i;
 	struct net_device *ndev;
-	mutex_lock(&g_monitor.lock);
 	if (g_monitor.monitor_state != MONITOR_STATE_DEINIT) {
+		mutex_lock(&g_monitor.lock);
 		for (i = 0; i < DHD_MAX_IFS; i++) {
 			ndev = g_monitor.mon_if[i].mon_ndev;
 			if (ndev) {
@@ -397,7 +400,7 @@ int dhd_monitor_uninit(void)
 			}
 		}
 		g_monitor.monitor_state = MONITOR_STATE_DEINIT;
+		mutex_unlock(&g_monitor.lock);
 	}
-	mutex_unlock(&g_monitor.lock);
 	return 0;
 }
