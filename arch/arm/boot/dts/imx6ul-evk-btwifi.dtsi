@@ -41,7 +41,7 @@
 	};
 };
 
-&reg_sd1_vmmc {
+&reg_wifi_vmmc {
 	regulator-always-on;
 };
 

@@ -1,0 +1,24 @@
+/*
+ * Copyright (C) 2016 Freescale Semiconductor, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include "imx6ull-14x14-evk-emmc-50-70.dts"
+
+/{
+	ds18b20{
+		status = "disable";
+	};
+	dht11{
+		compatible = "dht11";
+		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+		linux,open-drain;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_onewire>;
+		status = "okay";
+	};
+};
+

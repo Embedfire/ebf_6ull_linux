@@ -20,9 +20,9 @@
 		bus-width = <24>;
 
 		display-timings {
-			native-mode = <&timing1>;
+			native-mode = <&timing0>;
 
-			timing1: timing1 {
+			timing0: timing0 {
 			mode_name = "TFT50AB";
 			clock-frequency = <27000000>;
 			hactive = <800>;
@@ -54,14 +54,6 @@
 		reg = <0x68>;
 		position = <1>;
 	};
-	/*
-	gt9157@5d {
-		compatible = "goodix,gt9157";
-		reg = <0x5d>;
-		interrupt-parent = <&gpio5>;
-		interrupts = <9 GPIO_ACTIVE_HIGH>;
-		gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
-	};*/
 
 	gt9xx@5d {
 		compatible = "goodix,gt9xx";
@@ -83,8 +75,8 @@
 		irq-flags = <2>;		/*1:rising 2: falling*/
 
 		touchscreen-max-id = <1>;
-		touchscreen-size-x = <480>;
-		touchscreen-size-y = <272>;
+		touchscreen-size-x = <800>;
+		touchscreen-size-y = <480>;
 		touchscreen-max-w = <1024>;
 		touchscreen-max-p = <1024>;
 		/*touchscreen-key-map = <172>, <158>;*/ /*KEY_HOMEPAGE, KEY_BACK*/
@@ -175,21 +167,6 @@
 		00 FF FF FF FF FF FF FF FF FF
 		FF FF FF FF 48 01
 		];
-
 	};
-	/*
-	mag3110@0e {
-		compatible = "fsl,mag3110";
-		reg = <0x0e>;
-		position = <2>;
-	};
-
-	fxls8471@1e {
-		compatible = "fsl,fxls8471";
-		reg = <0x1e>;
-		position = <0>;
-		interrupt-parent = <&gpio5>;
-		interrupts = <0 8>;
-	};*/
 };
 

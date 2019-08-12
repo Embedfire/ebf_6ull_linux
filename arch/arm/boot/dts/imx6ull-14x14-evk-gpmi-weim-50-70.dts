@@ -20,9 +20,9 @@
 		bus-width = <24>;
 
 		display-timings {
-			native-mode = <&timing1>;
+			native-mode = <&timing0>;
 
-			timing1: timing1 {
+			timing0: timing0 {
 			mode_name = "TFT50AB";
 			clock-frequency = <27000000>;
 			hactive = <800>;
@@ -75,8 +75,8 @@
 		irq-flags = <2>;		/*1:rising 2: falling*/
 
 		touchscreen-max-id = <1>;
-		touchscreen-size-x = <480>;
-		touchscreen-size-y = <272>;
+		touchscreen-size-x = <800>;
+		touchscreen-size-y = <480>;
 		touchscreen-max-w = <1024>;
 		touchscreen-max-p = <1024>;
 		/*touchscreen-key-map = <172>, <158>;*/ /*KEY_HOMEPAGE, KEY_BACK*/
@@ -169,5 +169,4 @@
 		];
 	};
 };
-
 

@@ -8,13 +8,17 @@
 
 #include "imx6ull-14x14-evk-gpmi-weim-50-70.dts"
 
-&onewire @0{
-	compatible = "fsl,imx21-owire";
-	gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
-	linux,open-drain;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_onewire>;
-	status = "okay";
+/{
+	ds18b20{
+		status = "disable";
+	};
+	dht11{
+		compatible = "dht11";
+		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+		linux,open-drain;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_onewire>;
+		status = "okay";
+	};
 };
-
 

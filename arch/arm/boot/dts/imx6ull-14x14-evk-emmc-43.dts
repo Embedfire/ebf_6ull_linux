@@ -20,19 +20,19 @@
 		bus-width = <24>;
 
 		display-timings {
-			native-mode = <&timing1>;
+			native-mode = <&timing0>;
 
-			timing1: timing1 {
-			mode_name = "TFT50AB";
-			clock-frequency = <27000000>;
-			hactive = <800>;
-			vactive = <480>;
-			hfront-porch = <23>;
-			hback-porch = <46>;
-			hsync-len = <1>;
-			vback-porch = <22>;
-			vfront-porch = <22>;
-			vsync-len = <1>;
+			timing0: timing0 {
+			mode_name = "TFT43AB";
+			clock-frequency = <9000000>;
+			hactive = <480>;
+			vactive = <272>;
+			hfront-porch = <8>;
+			hback-porch = <2>;
+			hsync-len = <41>;
+			vback-porch = <4>;
+			vfront-porch = <4>;
+			vsync-len = <10>;
 
 			hsync-active = <0>;
 			vsync-active = <0>;

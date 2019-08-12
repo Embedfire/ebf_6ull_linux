@@ -48,14 +48,6 @@
 		compatible = "fsl,imx6ul-pxp-v4l2", "fsl,imx6sx-pxp-v4l2", "fsl,imx6sl-pxp-v4l2";
 		status = "okay";
 	};
-	/*
-	ir-receiver {
-			compatible = "gpio-ir-receiver";
-			gpios = <&gpio1 1 1>;
-			pinctrl-names = "default";
-			pinctrl-0 = <&pinctrl_remote_control>;
-	};
-	*/
 
 	regulators {
 		compatible = "simple-bus";
@@ -71,12 +63,12 @@
 			/*gpios = <&gpio_spi 3 GPIO_ACTIVE_LOW>;*/
 		};
 
-		reg_sd1_vmmc: regulator@1 {
+		reg_wifi_vmmc: regulator@1 {
 			compatible = "regulator-fixed";
 			regulator-name = "VSD_3V3";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
-			/*gpio = <&gpio1 1 GPIO_ACTIVE_HIGH>;*/
+			gpio = <&gpio1 1 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 		};
 		reg_vref_3v3: regulator@2 {
@@ -99,17 +91,18 @@
 		};
 
 		reg_bt: regulator-bt-reg {
-				compatible = "regulator-gpio";
-				pinctrl-names = "default";
-				pinctrl-0 = <&pinctrl_dvfs>;
-				regulator-min-microvolt = <1300000>;
-				regulator-max-microvolt = <1400000>;
-				regulator-name = "gpio_dvfs";
-				regulator-type = "voltage";
-				gpios = <&gpio5 3 GPIO_ACTIVE_HIGH>;
-				states = <1300000 0x1 1400000 0x0>;
+			compatible = "regulator-gpio";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_dvfs>;
+			regulator-min-microvolt = <1300000>;
+			regulator-max-microvolt = <1400000>;
+			regulator-name = "gpio_dvfs";
+			regulator-type = "voltage";
+			gpios = <&gpio5 3 GPIO_ACTIVE_HIGH>;
+			states = <1300000 0x1 1400000 0x0>;
 		};*/
 	};
+
 	leds {
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
@@ -122,28 +115,49 @@
 			linux,default-trigger = "heartbeat";
 		};
 	};
-/*
+
 	pwm_leds{
 		compatible = "pwm-leds";
+		status = "disable";
 		red {
 			label = "red";
-			pwms = <&pwm3 0 5000000>;
+			pwms = <&pwm3 0 500000>;
 			max-brightness = <255>;
 		};
 
 		green {
 			label = "green";
-			pwms = <&pwm7 0 5000000>;
+			pwms = <&pwm7 0 500000>;
 			max-brightness = <255>;
 		};
 
 		blue {
 			label = "blue";
-			pwms = <&pwm8 0 5000000>;
+			pwms = <&pwm8 0 500000>;
 			max-brightness = <255>;
 		};
 	};
-	*/
+
+	gpio-keys {
+			compatible = "gpio-keys";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_gpio_keys>;
+
+			Key0{
+				label = "Key 0";
+				gpios = <&gpio5 1 GPIO_ACTIVE_HIGH>;
+				linux,code = <KEY_0>;
+		};
+	};
+
+	ir-receiver {
+			compatible = "gpio-ir-receiver";
+			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_remote_control>;
+			status = "disable";
+	};
+
 	sound {
 		compatible = "fsl,imx6ul-evk-wm8960",
 			   "fsl,imx-audio-wm8960";
@@ -212,6 +226,23 @@
 		spdif-controller = <&spdif>;
 		spdif-in;
 		spdif-out;
+	};
+
+	sii902x_reset: sii902x-reset {
+		compatible = "gpio-reset";
+		reset-gpios = <&gpio_spi 0 GPIO_ACTIVE_LOW>;
+		reset-delay-us = <100000>;
+		#reset-cells = <0>;
+		status = "disabled";
+	};
+
+	ds18b20{
+		compatible = "w1-gpio";
+		gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+		linux,open-drain;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_onewire>;
+		status = "okay";
 	};
 
 };
@@ -301,14 +332,6 @@
 		reg = <0x68>;
 		position = <1>;
 	};
-	/*
-	gt9157@5d {
-		compatible = "goodix,gt9157";
-		reg = <0x5d>;
-		interrupt-parent = <&gpio5>;
-		interrupts = <9 GPIO_ACTIVE_HIGH>;
-		gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
-	};*/
 
 	gt9xx@5d {
 		compatible = "goodix,gt9xx";
@@ -458,11 +481,13 @@
 		compatible = "SiI,sii902x";
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_sii902x>;
+		resets = <&sii902x_reset>;
 		interrupt-parent = <&gpio1>;
 		interrupts = <18 IRQ_TYPE_EDGE_FALLING>;
-		mode_str ="1366x768M@60";
+		mode_str ="1280x720M@60";
 		bits-per-pixel = <16>;
 		reg = <0x39>;
+
 		status = "okay";
 	};
 
@@ -489,20 +514,12 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_beep>;
 	imx6ul-evk {
-		/*pinctrl_remote_control: remote_control {
+		pinctrl_remote_control: remote_control {
 			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0x1b0b1 /* remote control        add by pengjie 20190703
+				MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x000010B1 /* remote control        add by pengjie 20190703*/
 			>;
-		};*/
-		/*pinctrl_hog_1: hoggrp-1 {
-			fsl,pins = <
-				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19	0x17059 /* SD1 CD 
-				MX6UL_PAD_GPIO1_IO05__USDHC1_VSELECT	0x17059 /* SD1 VSELECT 
-				/*MX6UL_PAD_GPIO1_IO09__GPIO1_IO09	0x17059  SD1 RESET 
-			>;
-		};*/
+		};
 
 		pinctrl_csi1: csi1grp {
 			fsl,pins = <
@@ -667,15 +684,6 @@
 			>;
 		};
 
-		/*
-		pinctrl_tsc: tscgrp {
-			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0xb0
-				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02	0xb0
-				MX6UL_PAD_GPIO1_IO03__GPIO1_IO03	0xb0
-				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0xb0
-			>;
-		};*/
 		/* delete by pengjie*/
 		pinctrl_uart1: uart1grp {
 			fsl,pins = <
@@ -811,9 +819,10 @@
 			>;
 		};
 
-		pinctrl_onewire: onewire@0 {
+		pinctrl_onewire: onewire {
 			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02	0x000038B1
+				//MX6UL_PAD_GPIO1_IO02__GPIO1_IO02          0x000090B1     DHT11
+				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02          0x400138B1
 			>;
 		};
 
@@ -825,15 +834,16 @@
 
 		pinctrl_adc1: adc1grp{
 			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO03__GPIO1_IO03    0xB0
+				MX6UL_PAD_GPIO1_IO03__GPIO1_IO03          0x000010B1
 			>;
 		};
-
+/*
 		pinctrl_beep: beepgrp{
 			fsl,pins = <
-				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19    0x010B0
+				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19    0x000050B1
 			>;
 		};
+*/
 	};
 };
 
@@ -854,6 +864,11 @@
 			>;
 		};
 		*/
+		pinctrl_gpio_keys: keysgrp{
+			fsl,pins = <
+				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01      0x000110A1
+			>;
+		};
 		pinctrl_spi4: spi4grp {
 			fsl,pins = <
 				MX6ULL_PAD_BOOT_MODE0__GPIO5_IO10		0x70a1
@@ -958,25 +973,25 @@
 	pinctrl-0 = <&pinctrl_pwm1>;
 	status = "okay";
 };
-/*
+
 &pwm3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm3>;
-	status = "okay";
+	status = "diable";
 };
 
 &pwm7 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm7>;
-	status = "okay";
+	status = "diable";
 };
 
 &pwm8 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm8>;
-	status = "okay";
+	status = "diable";
 };
-*/
+
 &pxp {
 	status = "okay";
 };
@@ -1073,10 +1088,10 @@
 	pinctrl-0 = <&pinctrl_usdhc1>;
 	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
 	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
-	/*cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;*/
-	/*keep-power-in-suspend;*/
-	/*enable-sdio-wakeup;*/
-	/*vmmc-supply = <&reg_sd1_vmmc>;*/
+	/*cd-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
+	keep-power-in-suspend;
+	enable-sdio-wakeup;
+	vmmc-supply = <&reg_wifi_vmmc>;
 	status = "okay";
 };
 
@@ -1108,6 +1123,10 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_adc1>;
 	vref-supply = <&reg_vref_3v3>;
-	num-channels = <1>; 			//此参数为ADC的个数
+	num-channels = <4>; 			//此参数为ADC的个数
 	status = "okay";
+};
+
+&gpt2 {
+    status = "okay";
 };
