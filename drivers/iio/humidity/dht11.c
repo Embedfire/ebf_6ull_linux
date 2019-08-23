@@ -40,7 +40,7 @@
 
 #define DHT11_DATA_VALID_TIME	2000000000  /* 2s in ns */
 
-#define DHT11_EDGES_PREAMBLE 2
+#define DHT11_EDGES_PREAMBLE 1
 #define DHT11_BITS_PER_READ 40
 /*
  * Note that when reading the sensor actually 84 edges are detected, but
