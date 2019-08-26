@@ -645,7 +645,7 @@ int mmc_add_host(struct mmc_host *host)
 	if (err)
 		return err;
 
-	led_trigger_register_simple(dev_name(&host->class_dev), &host->led);
+	//led_trigger_register_simple(dev_name(&host->class_dev), &host->led);    // pengjie del 2019.8.26 00:48
 
 #ifdef CONFIG_DEBUG_FS
 	mmc_add_host_debugfs(host);
@@ -681,7 +681,7 @@ void mmc_remove_host(struct mmc_host *host)
 
 	device_del(&host->class_dev);
 
-	led_trigger_unregister_simple(host->led);
+	//led_trigger_unregister_simple(host->led);    // pengjie del 2019.8.26 00:48
 
 	mmc_host_clk_exit(host);
 }

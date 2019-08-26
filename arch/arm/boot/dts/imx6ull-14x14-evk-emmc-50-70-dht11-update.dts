@@ -1,0 +1,35 @@
+/*
+ * Copyright (C) 2016 Freescale Semiconductor, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include "imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts"
+
+/{
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_led_update>;
+
+		led0: cpu {
+			label = "cpu";
+			gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
+			//default-state = "on";
+			linux,default-trigger = "heartbeat";
+		};
+	};
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	imx6ul-evk {
+		pinctrl_led_update: ledupdategrp {
+			fsl,pins = <
+				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04           0x000010B1
+			>;
+		};
+	};
+};

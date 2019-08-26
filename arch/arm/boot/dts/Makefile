@@ -419,6 +419,16 @@ dtb-$(CONFIG_SOC_IMX6ULL) += \
 	imx6ull-14x14-evk-emmc.dtb \
 	imx6ull-14x14-evk-gpmi-weim.dtb \
 	imx6ull-14x14-evk-usb-certi.dtb \
+	imx6ull-14x14-evk-gpmi-weim-43.dtb \
+	imx6ull-14x14-evk-gpmi-weim-50-70.dtb \
+	imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dtb \
+	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dtb \
+	imx6ull-14x14-evk-emmc-43.dtb \
+	imx6ull-14x14-evk-emmc-50-70.dtb \
+	imx6ull-14x14-evk-emmc-50-70-dht11.dtb \
+	imx6ull-14x14-evk-emmc-50-70-dht11-leds.dtb \
+	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dtb \
+	imx6ull-14x14-evk-emmc-50-70-dht11-update.dtb \
 	imx6ull-9x9-evk.dtb \
 	imx6ull-9x9-evk-btwifi.dtb \
 	imx6ull-9x9-evk-ldo.dtb

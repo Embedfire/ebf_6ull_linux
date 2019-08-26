@@ -106,7 +106,7 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
 	led_data->cdev.name = led->name;
 	led_data->cdev.default_trigger = led->default_trigger;
 	led_data->cdev.brightness_set = led_pwm_set;
-	led_data->cdev.brightness = LED_OFF;
+	led_data->cdev.brightness = LED_HALF;
 	led_data->cdev.max_brightness = led->max_brightness;
 	led_data->cdev.flags = LED_CORE_SUSPENDRESUME;
 

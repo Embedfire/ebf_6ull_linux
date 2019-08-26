@@ -65,7 +65,7 @@
 
 		reg_wifi_vmmc: regulator@1 {
 			compatible = "regulator-fixed";
-			regulator-name = "VSD_3V3";
+			regulator-name = "WIFI_3V3";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
 			gpio = <&gpio1 1 GPIO_ACTIVE_HIGH>;
@@ -125,17 +125,18 @@
 			max-brightness = <255>;
 		};
 
-		green {
-			label = "green";
+		blue {
+			label = "blue";
 			pwms = <&pwm7 0 500000>;
 			max-brightness = <255>;
 		};
 
-		blue {
-			label = "blue";
+		green {
+			label = "green";
 			pwms = <&pwm8 0 500000>;
 			max-brightness = <255>;
 		};
+
 	};
 
 	gpio-keys {
@@ -250,6 +251,7 @@
 &cpu0 {
 	arm-supply = <&reg_arm>;
 	soc-supply = <&reg_soc>;
+	clock-frequency = <800000000>;
 	/*dc-supply = <&reg_gpio_dvfs>;*/
 };
 

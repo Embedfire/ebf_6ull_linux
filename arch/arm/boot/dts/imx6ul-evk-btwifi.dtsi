@@ -29,6 +29,10 @@
 		compatible = "android,bcmdhd_wlan";
 		wlreg_on-supply = <&wlreg_on>;
 	};
+
+	reg_wifi_vmmc {
+		regulator-always-on;
+	};
 };
 
 &iomuxc {
@@ -39,10 +43,6 @@
 			>;
 		};
 	};
-};
-
-&reg_wifi_vmmc {
-	regulator-always-on;
 };
 
 &usdhc1 {

@@ -157,7 +157,7 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
 	} else {
 		mmc_should_fail_request(host, mrq);
 
-		led_trigger_event(host->led, LED_OFF);
+		//led_trigger_event(host->led, LED_OFF);    // pengjie del 2019.8.26 00:48
 
 		if (mrq->sbc) {
 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
@@ -277,7 +277,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 		}
 	}
 	mmc_host_clk_hold(host);
-	led_trigger_event(host->led, LED_FULL);
+	//led_trigger_event(host->led, LED_FULL);    // pengjie del 2019.8.26 00:48
 	__mmc_start_request(host, mrq);
 
 	return 0;

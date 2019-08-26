@@ -105,8 +105,8 @@ static int dht11_decode(struct dht11 *dht11, int offset)
 		return -EIO;
 	}
 	threshold = DHT11_DATA_BIT_HIGH / timeres;
-	if (DHT11_DATA_BIT_LOW/timeres + 1 >= threshold)
-		pr_err("dht11: WARNING: decoding ambiguous\n");
+	/*if (DHT11_DATA_BIT_LOW/timeres + 1 >= threshold)	// pengjie del for DHT11
+		pr_err("dht11: WARNING: decoding ambiguous\n");*/
 
 	/* scale down with timeres and check validity */
 	for (i = 0; i < DHT11_BITS_PER_READ; ++i) {
@@ -127,6 +127,7 @@ static int dht11_decode(struct dht11 *dht11, int offset)
 		return -EIO;
 
 	dht11->timestamp = iio_get_time_ns();
+#if 0
 	if (hum_int < 20) {  /* DHT22 */
 		dht11->temperature = (((temp_int & 0x7f) << 8) + temp_dec) *
 					((temp_int & 0x80) ? -100 : 100);
@@ -140,7 +141,12 @@ static int dht11_decode(struct dht11 *dht11, int offset)
 			hum_int, hum_dec, temp_int, temp_dec);
 		return -EIO;
 	}
-
+#endif 
+	dht11->temperature = temp_int;
+	dht11->humidity = hum_int;
+	dev_err(dht11->dev,
+		"DHT11: %d %d %d %d\n",
+		hum_int, hum_dec, temp_int, temp_dec);
 	return 0;
 }
 

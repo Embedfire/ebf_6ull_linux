@@ -9,39 +9,40 @@
 #include "imx6ull-14x14-evk-emmc-50-70-dht11.dts"
 
 /{
-/*
+
 	pwm_leds{
 		compatible = "pwm-leds";
 		status = "okay";
-		red {
-			label = "imx6:red:led1";
-			pwms = <&pwm3 0 500000 0>;
-			linux,default-trigger = "backlight";
-			max-brightness = <255>;
-		};
 
-		green {
-			label = "imx6:green:led2";
-			pwms = <&pwm7 0 500000 0>;
-			linux,default-trigger = "backlight";
+		red {
+			label = "red";
+			active-low;
+			pwms = <&pwm3 0 5000>;
 			max-brightness = <255>;
 		};
 
 		blue {
-			label =  "imx6:blue:led3";
-			pwms = <&pwm8 0 500000 0>;
-			linux,default-trigger = "backlight";
+			label =  "blue";
+			active-low;
+			pwms = <&pwm7 0 5000>;
+			max-brightness = <255>;
+		};
+
+		green {
+			label = "green";
+			active-low;
+			pwms = <&pwm8 0 5000>;
 			max-brightness = <255>;
 		};
 	};
-	*/
-	ir-receiver {
+
+	ir_recv:ir-receiver {
 			compatible = "gpio-ir-receiver";
 			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
-			gpios = <&pinctrl_remote_control>;
+			/*gpios = <&pinctrl_remote_control>;*/
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_remote_control>;
-			status = "disable";
+			status = "okay";
 	};
 };
 
@@ -55,7 +56,7 @@
 		status = "disable";
 		};
 	};
-/*
+
 &pwm3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm3>;
@@ -73,12 +74,12 @@
 	pinctrl-0 = <&pinctrl_pwm8>;
 	status = "okay";
 };
-*/
+
 
 &uart2{
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_485>;
 	fsl,rs485-gpio-txen = <&gpio1 18 GPIO_ACTIVE_HIGH>;
 	linux,rs485-enabled-at-boot-time;
-	status = "okay";
+	status = "disable";
 };
