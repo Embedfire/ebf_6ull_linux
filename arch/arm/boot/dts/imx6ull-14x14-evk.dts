@@ -234,7 +234,7 @@
 		reset-gpios = <&gpio_spi 0 GPIO_ACTIVE_LOW>;
 		reset-delay-us = <100000>;
 		#reset-cells = <0>;
-		status = "disabled";
+		status = "okay";
 	};
 
 	ds18b20{

@@ -38,10 +38,11 @@
 
 	ir_recv:ir-receiver {
 			compatible = "gpio-ir-receiver";
-			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
-			/*gpios = <&pinctrl_remote_control>;*/
+			#gpio-cells = <1>;
+			gpios = <&gpio1 21 GPIO_ACTIVE_LOW>;
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_remote_control>;
+			linux,rc-map-name = "rc-tbs-nec";
 			status = "okay";
 	};
 };

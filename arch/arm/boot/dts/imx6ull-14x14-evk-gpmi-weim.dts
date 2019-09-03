@@ -9,7 +9,7 @@
 #include "imx6ull-14x14-evk.dts"
 
 /*add by pengjie for bt/wifi*/
-#include "imx6ul-evk-btwifi.dtsi"
+/*#include "imx6ul-evk-btwifi.dtsi"*/
 
 &gpmi {
 	pinctrl-names = "default";
