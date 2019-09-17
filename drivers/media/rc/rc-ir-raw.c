@@ -122,7 +122,7 @@ int ir_raw_event_store_edge(struct rc_dev *dev, enum raw_event_type type)
 	 * being called for the first time, note that delta can't
 	 * possibly be negative.
 	 */
-	if (delta > delay || !dev->raw->last_type)
+	if (delta > delay || !dev->raw->last_type)  // 一开始这个delta的值很大，肯定大于500ms
 		type |= IR_START_EVENT;
 	else
 		ev.duration = delta;

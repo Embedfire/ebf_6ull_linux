@@ -398,42 +398,18 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ul-9x9-evk-csi.dtb \
 	imx6ul-9x9-evk-ldo.dtb
 dtb-$(CONFIG_SOC_IMX6ULL) += \
-	imx6ull-14x14-ddr3-arm2.dtb \
-	imx6ull-14x14-ddr3-arm2-adc.dtb \
-	imx6ull-14x14-ddr3-arm2-cs42888.dtb \
-	imx6ull-14x14-ddr3-arm2-ecspi.dtb \
-	imx6ull-14x14-ddr3-arm2-emmc.dtb \
-	imx6ull-14x14-ddr3-arm2-epdc.dtb \
-	imx6ull-14x14-ddr3-arm2-flexcan2.dtb \
-	imx6ull-14x14-ddr3-arm2-gpmi-weim.dtb \
-	imx6ull-14x14-ddr3-arm2-lcdif.dtb \
-	imx6ull-14x14-ddr3-arm2-ldo.dtb \
-	imx6ull-14x14-ddr3-arm2-qspi.dtb \
-	imx6ull-14x14-ddr3-arm2-qspi-all.dtb \
-	imx6ull-14x14-ddr3-arm2-tsc.dtb \
-	imx6ull-14x14-ddr3-arm2-uart2.dtb \
-	imx6ull-14x14-ddr3-arm2-usb.dtb \
-	imx6ull-14x14-ddr3-arm2-wm8958.dtb \
 	imx6ull-14x14-evk.dtb \
 	imx6ull-14x14-evk-btwifi.dtb \
 	imx6ull-14x14-evk-emmc.dtb \
 	imx6ull-14x14-evk-gpmi-weim.dtb \
-	imx6ull-14x14-evk-usb-certi.dtb \
 	imx6ull-14x14-evk-gpmi-weim-43.dtb \
-	imx6ull-14x14-evk-gpmi-weim-50-70.dtb \
-	imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dtb \
-	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dtb \
-	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dtb \
-	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-WIFI.dtb \
 	imx6ull-14x14-evk-emmc-43.dtb \
-	imx6ull-14x14-evk-emmc-50-70.dtb \
-	imx6ull-14x14-evk-emmc-50-70-dht11.dtb \
-	imx6ull-14x14-evk-emmc-50-70-dht11-leds.dtb \
-	imx6ull-14x14-evk-emmc-50-70-dht11-update.dtb \
-	imx6ull-14x14-evk-emmc-50-70-dht11-WIFI.dtb \
-	imx6ull-9x9-evk.dtb \
-	imx6ull-9x9-evk-btwifi.dtb \
-	imx6ull-9x9-evk-ldo.dtb
+	imx6ull-14x14-evk-gpmi-weim-hdmi.dtb \
+	imx6ull-14x14-evk-emmc-hdmi.dtb \
+	imx6ull-14x14-evk-gpmi-weim-wifi.dtb \
+	imx6ull-14x14-evk-emmc-wifi.dtb \
+	imx6ull-14x14-evk-gpmi-weim-cam-18b20.dtb \
+	imx6ull-14x14-evk-emmc-cam-18b20.dtb
 dtb-$(CONFIG_SOC_IMX6SLL) += \
 	imx6sll-lpddr2-arm2.dtb \
 	imx6sll-lpddr3-arm2.dtb \

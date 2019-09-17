@@ -258,7 +258,7 @@ void led_trigger_event(struct led_trigger *trig,
 
 	if (!trig)
 		return;
-	printk("\n%s,    %s,    %d\n", __FILE__, __func__, __LINE__);   // pengjie add 2019.8.26 21:27
+	//printk("\n%s,    %s,    %d\n", __FILE__, __func__, __LINE__);   // pengjie add 2019.8.26 21:27
 	read_lock(&trig->leddev_list_lock);
 	list_for_each_entry(led_cdev, &trig->led_cdevs, trig_list)
 		led_set_brightness(led_cdev, brightness);

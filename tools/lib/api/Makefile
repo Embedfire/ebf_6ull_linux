@@ -8,8 +8,8 @@ srctree := $(patsubst %/,%,$(dir $(srctree)))
 #$(info Determined 'srctree' to be $(srctree))
 endif
 
-#CC
-#AR
+CC = $(CROSS_COMPILE)gcc
+AR = $(CROSS_COMPILE)ar
 
 MAKEFLAGS += --no-print-directory
 

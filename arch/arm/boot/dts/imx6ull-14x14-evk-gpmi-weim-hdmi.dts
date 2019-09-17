@@ -23,10 +23,10 @@
 			native-mode = <&timing0>;
 
 			timing0: timing0 {
-			mode_name = "TFT43AB";
-			clock-frequency = <9000000>;
-			hactive = <480>;
-			vactive = <272>;
+			mode_name = "hdmi";
+			clock-frequency = <27000000>;
+			hactive = <1360>;
+			vactive = <768>;
 			hfront-porch = <8>;
 			hback-porch = <2>;
 			hsync-len = <41>;
@@ -46,7 +46,7 @@
 &i2c1 {
 
 	gt9xx@5d {
-		touchscreen-size-x = <480>;
-		touchscreen-size-y = <272>;
+		touchscreen-size-x = <1360>;
+		touchscreen-size-y = <768>;
 	};
 };

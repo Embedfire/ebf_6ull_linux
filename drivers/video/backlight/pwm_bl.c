@@ -184,7 +184,7 @@ static int pwm_backlight_parse_dt(struct device *dev,
 			return ret;
 
 		data->dft_brightness = value;
-		data->max_brightness--;
+		//data->max_brightness--;
 	}
 
 	if (!of_property_read_string(node, "fb-names", &names)){

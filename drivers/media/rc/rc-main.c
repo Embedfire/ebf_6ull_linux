@@ -1426,6 +1426,8 @@ int rc_register_device(struct rc_dev *dev)
 		if (rc < 0)
 			goto out_raw;
 		dev->enabled_protocols = rc_type;
+
+        printk("\nprotocols = 0x%8x, rc_type = 0x%8x\n", (u32)dev->enabled_protocols,(u32)rc_type);   // pengjie add 2019.8.26 21:27
 	}
 
 	mutex_unlock(&dev->lock);
