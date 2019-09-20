@@ -5,5 +5,5 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#include "imx6ull-14x14-evk-gpmi-weim.dts"
+#include "imx6ull-14x14-evk.dts"
 #include "imx6ul-evk-btwifi.dtsi"

@@ -6,7 +6,7 @@
  * published by the Free Software Foundation.
  */
 
-#include "imx6ull-14x14-evk-gpmi-weim.dts"
+#include "imx6ull-14x14-evk.dts"
 
 / {
 	pwm_leds{

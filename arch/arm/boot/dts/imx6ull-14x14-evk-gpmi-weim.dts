@@ -10,14 +10,14 @@
 
 &gpmi {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_gpmi_nand_1>;
+	pinctrl-0 = <&pinctrl_gpmi_nand>;
 	status = "okay";
 	nand-on-flash-bbt;
 };
 
 &iomuxc {
 	imx6ull-evk-gpmi-rework {
-		pinctrl_gpmi_nand_1: gpmi-nand-1 {
+		pinctrl_gpmi_nand: gpmi-nand {
 			fsl,pins = <
 				MX6UL_PAD_NAND_CLE__RAWNAND_CLE         0xb0b1
 				MX6UL_PAD_NAND_ALE__RAWNAND_ALE         0xb0b1

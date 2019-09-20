@@ -8,6 +8,10 @@
 
 #include "imx6ull-14x14-evk.dts"
 
+&gpmi {
+	status = "disable";
+};
+
 &usdhc2 {
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
