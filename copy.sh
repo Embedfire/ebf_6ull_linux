@@ -7,13 +7,13 @@
 cp /home/rich/SRC/kernel/arch/arm/boot/zImage /home/rich/image/
 
 
-cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim.dtb
+#cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim.dtb
 #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim.dtb /home/rich/image/
 #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim.dtb /mnt/hgfs/my-file/
 
 cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-43.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb
 cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-hdmi.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-hdmi.dtb
-cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-cam-18b20.dtb
+cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-dht11.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-cam-dht11.dtb
 #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb /home/rich/image/
 #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb /mnt/hgfs/my-file/
 
@@ -32,7 +32,7 @@ cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dtb /home/rich
 
 cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-43.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-43.dtb
 cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-hdmi.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-hdmi.dtb
-cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-18b20.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-cam-18b20.dtb
+cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-dht11.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-cam-dht11.dtb
 #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-43.dtb /home/rich/image/
 #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-43.dtb /mnt/hgfs/my-file/
 

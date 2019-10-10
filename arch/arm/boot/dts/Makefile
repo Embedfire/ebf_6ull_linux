@@ -407,8 +407,8 @@ dtb-$(CONFIG_SOC_IMX6ULL) += \
 	imx6ull-14x14-evk-emmc-hdmi.dtb \
 	imx6ull-14x14-evk-gpmi-weim-wifi.dtb \
 	imx6ull-14x14-evk-emmc-wifi.dtb \
-	imx6ull-14x14-evk-gpmi-weim-cam-18b20.dtb \
-	imx6ull-14x14-evk-emmc-cam-18b20.dtb
+	imx6ull-14x14-evk-gpmi-weim-cam-dht11.dtb \
+	imx6ull-14x14-evk-emmc-cam-dht11.dtb
 dtb-$(CONFIG_SOC_IMX6SLL) += \
 	imx6sll-lpddr2-arm2.dtb \
 	imx6sll-lpddr3-arm2.dtb \
