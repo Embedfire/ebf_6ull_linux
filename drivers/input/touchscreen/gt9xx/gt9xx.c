@@ -1345,7 +1345,7 @@ static int gtp_request_io_port(struct goodix_ts_data *ts)
 	int ret = 0;
 
 	if (gpio_is_valid(ts->pdata->irq_gpio)) {
-		ret = gpio_request(ts->pdata->irq_gpio, "goodix_ts_int");
+		ret = gpio_request(ts->pdata->irq_gpio, "pinctrl_tsc_irq");
 		if (ret < 0) {
 			dev_err(&ts->client->dev,
 				"Failed to request GPIO:%d, ERRNO:%d\n",
@@ -1358,7 +1358,7 @@ static int gtp_request_io_port(struct goodix_ts_data *ts)
 	}
 
 	if (gpio_is_valid(ts->pdata->rst_gpio)) {
-		ret = gpio_request(ts->pdata->rst_gpio, "goodix_ts_rst");
+		ret = gpio_request(ts->pdata->rst_gpio, "pinctrl_tsc_reset");
 		if (ret < 0) {
 			dev_err(&ts->client->dev,
 				"Failed to request GPIO:%d, ERRNO:%d\n",
@@ -1902,14 +1902,14 @@ static int gtp_probe(struct i2c_client *client, const struct i2c_device_id *id)
 		dev_err(&client->dev, "Failed get wanted pinctrl state\n");
 		goto exit_deinit_power;
 	}
-
+#endif
 	ret = gtp_request_io_port(ts);
 	if (ret < 0) {
 		dev_err(&client->dev, "Failed request IO port\n");
 		goto exit_power_off;
 	}
-#endif
-	//gtp_reset_guitar(ts->client, 20);    pengjie 不需要复位
+
+	gtp_reset_guitar(ts->client, 50);    //pengjie 不需要复位
 
 	ret = gtp_i2c_test(client);
 	if (ret) {

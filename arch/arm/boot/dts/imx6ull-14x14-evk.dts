@@ -343,9 +343,9 @@
 		status = "okay";
 		interrupt-parent = <&gpio5>;
 		interrupts = <9 IRQ_TYPE_EDGE_FALLING>;
-		pinctrl-names = "default";
+		pinctrl-names = "pinctrl_tsc_reset","pinctrl_tsc_irq"; 
 		pinctrl-0 = <&pinctrl_tsc_reset>;
-		/*pinctrl-1 = <&pinctrl_tsc_irq>;*/
+		pinctrl-1 = <&pinctrl_tsc_irq>;
 		/*pinctrl-names = "default", "int-output-low", "int-output-high", "int-input";
 		pinctrl-0 = <&ts_int_default>;
 		pinctrl-1 = <&ts_int_output_low>;

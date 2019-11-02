@@ -118,7 +118,7 @@ void led_set_brightness(struct led_classdev *led_cdev,
 			enum led_brightness brightness)
 {
 	int ret = 0;
-	printk("\n%s,    %s,    %d\n", __FILE__, __func__, __LINE__);
+	//printk("\n%s,    %s,    %d\n", __FILE__, __func__, __LINE__);
 	/* delay brightness setting if need to stop soft-blink timer */
 	if (led_cdev->blink_delay_on || led_cdev->blink_delay_off) {
 		led_cdev->delayed_set_value = brightness;
