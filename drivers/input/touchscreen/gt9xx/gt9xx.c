@@ -520,7 +520,7 @@ void gtp_mt_slot_report(struct goodix_ts_data *ts, u8 touch_num,
 			input_report_abs(ts->input_dev, ABS_X,
 					 points->x);
 			input_report_abs(ts->input_dev, ABS_Y,
-					 points->y);            
+					 points->y);
 
 			input_report_abs(ts->input_dev, ABS_MT_POSITION_X,
 					 points->x);
@@ -727,6 +727,9 @@ void gtp_reset_guitar(struct i2c_client *client, s32 ms)
 	}
 
 	gpio_direction_output(ts->pdata->rst_gpio, 0);
+
+
+
 	usleep_range(ms*1000, ms*1000 + 100);	/*  T2: > 10ms */
 
 	gtp_int_output(ts, client->addr == 0x14);
@@ -1345,7 +1348,7 @@ static int gtp_request_io_port(struct goodix_ts_data *ts)
 	int ret = 0;
 
 	if (gpio_is_valid(ts->pdata->irq_gpio)) {
-		ret = gpio_request(ts->pdata->irq_gpio, "pinctrl_tsc_irq");
+		ret = gpio_request(ts->pdata->irq_gpio, "goodix_ts_int");
 		if (ret < 0) {
 			dev_err(&ts->client->dev,
 				"Failed to request GPIO:%d, ERRNO:%d\n",
@@ -1358,7 +1361,7 @@ static int gtp_request_io_port(struct goodix_ts_data *ts)
 	}
 
 	if (gpio_is_valid(ts->pdata->rst_gpio)) {
-		ret = gpio_request(ts->pdata->rst_gpio, "pinctrl_tsc_reset");
+		ret = gpio_request(ts->pdata->rst_gpio, "goodix_ts_rst");
 		if (ret < 0) {
 			dev_err(&ts->client->dev,
 				"Failed to request GPIO:%d, ERRNO:%d\n",
@@ -1445,7 +1448,7 @@ static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
 
 	input_set_capability(ts->input_dev, EV_KEY, BTN_STYLUS);
         input_set_capability(ts->input_dev, EV_KEY, BTN_STYLUS2);
-	
+
 	/* touch key register */
 	for (index = 0; index < ts->pdata->key_nums; index++)
 		input_set_capability(ts->input_dev, EV_KEY,
@@ -1893,6 +1896,7 @@ static int gtp_probe(struct i2c_client *client, const struct i2c_device_id *id)
 		goto exit_deinit_power;
 	}
 
+
 	ret = gtp_pinctrl_init(ts);
 	if (ret < 0) {
 		/* if define pinctrl must define the following state
@@ -1909,7 +1913,7 @@ static int gtp_probe(struct i2c_client *client, const struct i2c_device_id *id)
 		goto exit_power_off;
 	}
 
-	gtp_reset_guitar(ts->client, 50);    //pengjie 不需要复位
+	gtp_reset_guitar(ts->client, 50);    //pengjie 需要复位
 
 	ret = gtp_i2c_test(client);
 	if (ret) {
@@ -1968,7 +1972,7 @@ static int gtp_probe(struct i2c_client *client, const struct i2c_device_id *id)
 
 	if (pdata->create_wr_node)
 		init_wr_node(client);/*TODO judge return value */
-    
+
 	/*    pengjie 0716
 	gtp_esd_init(ts);
 	if (pdata->esd_protect)
