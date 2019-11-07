@@ -1,0 +1,610 @@
+From 157b38ec7c9dce38ba213f53f492c74e11dcc337 Mon Sep 17 00:00:00 2001
+From: pengjie <jiejie.128@163.com>
+Date: Mon, 26 Aug 2019 21:29:18 +0800
+Subject: [PATCH 04/13] Modified 1.pwm_core 2.led_pwm 3.mmc led
+
+Signed-off-by: pengjie <jiejie.128@163.com>
+---
+ arch/arm/boot/dts/Makefile                    | 10 +++++
+ arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi      |  8 ++--
+ ...mx6ull-14x14-evk-emmc-50-70-dht11-leds.dts | 39 +++++++++---------
+ ...6ull-14x14-evk-emmc-50-70-dht11-update.dts | 35 ++++++++++++++++
+ ...l-14x14-evk-gpmi-weim-50-70-dht11-leds.dts | 40 +++++++++----------
+ ...14x14-evk-gpmi-weim-50-70-dht11-update.dts | 35 ++++++++++++++++
+ arch/arm/boot/dts/imx6ull-14x14-evk.dts       | 12 +++---
+ arch/arm/boot/dts/imx6ull.dtsi                | 24 +++++------
+ copy.sh                                       | 40 +++++++++++++++++++
+ drivers/iio/humidity/dht11.c                  | 12 ++++--
+ drivers/leds/led-core.c                       |  2 +-
+ drivers/leds/led-triggers.c                   |  2 +-
+ drivers/leds/leds-pwm.c                       |  2 +-
+ drivers/mmc/core/core.c                       |  4 +-
+ drivers/mmc/core/host.c                       |  4 +-
+ 15 files changed, 199 insertions(+), 70 deletions(-)
+ create mode 100644 arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-update.dts
+ create mode 100644 arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dts
+ create mode 100644 copy.sh
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index 742a8f50856c..e4b6b110e9ac 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -419,6 +419,16 @@ dtb-$(CONFIG_SOC_IMX6ULL) += \
+ 	imx6ull-14x14-evk-emmc.dtb \
+ 	imx6ull-14x14-evk-gpmi-weim.dtb \
+ 	imx6ull-14x14-evk-usb-certi.dtb \
++	imx6ull-14x14-evk-gpmi-weim-43.dtb \
++	imx6ull-14x14-evk-gpmi-weim-50-70.dtb \
++	imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dtb \
++	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dtb \
++	imx6ull-14x14-evk-emmc-43.dtb \
++	imx6ull-14x14-evk-emmc-50-70.dtb \
++	imx6ull-14x14-evk-emmc-50-70-dht11.dtb \
++	imx6ull-14x14-evk-emmc-50-70-dht11-leds.dtb \
++	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dtb \
++	imx6ull-14x14-evk-emmc-50-70-dht11-update.dtb \
+ 	imx6ull-9x9-evk.dtb \
+ 	imx6ull-9x9-evk-btwifi.dtb \
+ 	imx6ull-9x9-evk-ldo.dtb
+diff --git a/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi b/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi
+index 1bfe5d2ff196..3f7d369b1eda 100644
+--- a/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi
++++ b/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi
+@@ -29,6 +29,10 @@
+ 		compatible = "android,bcmdhd_wlan";
+ 		wlreg_on-supply = <&wlreg_on>;
+ 	};
++
++	reg_wifi_vmmc {
++		regulator-always-on;
++	};
+ };
+ 
+ &iomuxc {
+@@ -41,10 +45,6 @@
+ 	};
+ };
+ 
+-&reg_wifi_vmmc {
+-	regulator-always-on;
+-};
+-
+ &usdhc1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_usdhc1 &pinctrl_wifi>;
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts
+index f1b089ab3d3c..1105170e0f9a 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts
+@@ -9,39 +9,40 @@
+ #include "imx6ull-14x14-evk-emmc-50-70-dht11.dts"
+ 
+ /{
+-/*
++
+ 	pwm_leds{
+ 		compatible = "pwm-leds";
+ 		status = "okay";
++
+ 		red {
+-			label = "imx6:red:led1";
+-			pwms = <&pwm3 0 500000 0>;
+-			linux,default-trigger = "backlight";
++			label = "red";
++			active-low;
++			pwms = <&pwm3 0 5000>;
+ 			max-brightness = <255>;
+ 		};
+ 
+-		green {
+-			label = "imx6:green:led2";
+-			pwms = <&pwm7 0 500000 0>;
+-			linux,default-trigger = "backlight";
++		blue {
++			label =  "blue";
++			active-low;
++			pwms = <&pwm7 0 5000>;
+ 			max-brightness = <255>;
+ 		};
+ 
+-		blue {
+-			label =  "imx6:blue:led3";
+-			pwms = <&pwm8 0 500000 0>;
+-			linux,default-trigger = "backlight";
++		green {
++			label = "green";
++			active-low;
++			pwms = <&pwm8 0 5000>;
+ 			max-brightness = <255>;
+ 		};
+ 	};
+-	*/
+-	ir-receiver {
++
++	ir_recv:ir-receiver {
+ 			compatible = "gpio-ir-receiver";
+ 			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
+-			gpios = <&pinctrl_remote_control>;
++			/*gpios = <&pinctrl_remote_control>;*/
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&pinctrl_remote_control>;
+-			status = "disable";
++			status = "okay";
+ 	};
+ };
+ 
+@@ -55,7 +56,7 @@
+ 		status = "disable";
+ 		};
+ 	};
+-/*
++
+ &pwm3 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pwm3>;
+@@ -73,12 +74,12 @@
+ 	pinctrl-0 = <&pinctrl_pwm8>;
+ 	status = "okay";
+ };
+-*/
++
+ 
+ &uart2{
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_485>;
+ 	fsl,rs485-gpio-txen = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+ 	linux,rs485-enabled-at-boot-time;
+-	status = "okay";
++	status = "disable";
+ };
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-update.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-update.dts
+new file mode 100644
+index 000000000000..5e267322a451
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-update.dts
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include "imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts"
++
++/{
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_led_update>;
++
++		led0: cpu {
++			label = "cpu";
++			gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
++			//default-state = "on";
++			linux,default-trigger = "heartbeat";
++		};
++	};
++};
++
++&iomuxc {
++	pinctrl-names = "default";
++	imx6ul-evk {
++		pinctrl_led_update: ledupdategrp {
++			fsl,pins = <
++				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04           0x000010B1
++			>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
+index 51a20bc4f458..b326f2ea3c9e 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
+@@ -9,39 +9,40 @@
+ #include "imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dts"
+ 
+ /{
+-/*
++
+ 	pwm_leds{
+ 		compatible = "pwm-leds";
+ 		status = "okay";
++
+ 		red {
+-			label = "imx6:red:led1";
+-			pwms = <&pwm3 0 500000 0>;
+-			linux,default-trigger = "backlight";
++			label = "red";
++			active-low;
++			pwms = <&pwm3 0 5000>;
+ 			max-brightness = <255>;
+ 		};
+ 
+-		green {
+-			label = "imx6:green:led2";
+-			pwms = <&pwm7 0 500000 0>;
+-			linux,default-trigger = "backlight";
++		blue {
++			label =  "blue";
++			active-low;
++			pwms = <&pwm7 0 5000>;
+ 			max-brightness = <255>;
+ 		};
+ 
+-		blue {
+-			label =  "imx6:blue:led3";
+-			pwms = <&pwm8 0 500000 0>;
+-			linux,default-trigger = "backlight";
++		green {
++			label = "green";
++			active-low;
++			pwms = <&pwm8 0 5000>;
+ 			max-brightness = <255>;
+ 		};
+ 	};
+-	*/
+-	ir-receiver {
++
++	ir_recv:ir-receiver {
+ 			compatible = "gpio-ir-receiver";
+ 			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
+-			gpios = <&pinctrl_remote_control>;
++			/*gpios = <&pinctrl_remote_control>;*/
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&pinctrl_remote_control>;
+-			status = "disable";
++			status = "okay";
+ 	};
+ };
+ 
+@@ -55,7 +56,7 @@
+ 		status = "disable";
+ 		};
+ 	};
+-/*
++
+ &pwm3 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pwm3>;
+@@ -73,13 +74,12 @@
+ 	pinctrl-0 = <&pinctrl_pwm8>;
+ 	status = "okay";
+ };
+-*/
++
+ 
+ &uart2{
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_485>;
+ 	fsl,rs485-gpio-txen = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+ 	linux,rs485-enabled-at-boot-time;
+-	status = "okay";
++	status = "disable";
+ };
+-
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dts
+new file mode 100644
+index 000000000000..16bd4c41e38c
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dts
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include "imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts"
++
++/{
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_led_update>;
++
++		led0: cpu {
++			label = "cpu";
++			gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
++			//default-state = "on";
++			linux,default-trigger = "heartbeat";
++		};
++	};
++};
++
++&iomuxc {
++	pinctrl-names = "default";
++	imx6ul-evk {
++		pinctrl_led_update: ledupdategrp {
++			fsl,pins = <
++				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04           0x000010B1
++			>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk.dts b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+index f41f85f899ca..13d933df3a04 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+@@ -65,7 +65,7 @@
+ 
+ 		reg_wifi_vmmc: regulator@1 {
+ 			compatible = "regulator-fixed";
+-			regulator-name = "VSD_3V3";
++			regulator-name = "WIFI_3V3";
+ 			regulator-min-microvolt = <3300000>;
+ 			regulator-max-microvolt = <3300000>;
+ 			gpio = <&gpio1 1 GPIO_ACTIVE_HIGH>;
+@@ -125,17 +125,18 @@
+ 			max-brightness = <255>;
+ 		};
+ 
+-		green {
+-			label = "green";
++		blue {
++			label = "blue";
+ 			pwms = <&pwm7 0 500000>;
+ 			max-brightness = <255>;
+ 		};
+ 
+-		blue {
+-			label = "blue";
++		green {
++			label = "green";
+ 			pwms = <&pwm8 0 500000>;
+ 			max-brightness = <255>;
+ 		};
++
+ 	};
+ 
+ 	gpio-keys {
+@@ -250,6 +251,7 @@
+ &cpu0 {
+ 	arm-supply = <&reg_arm>;
+ 	soc-supply = <&reg_soc>;
++	clock-frequency = <800000000>;
+ 	/*dc-supply = <&reg_gpio_dvfs>;*/
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx6ull.dtsi b/arch/arm/boot/dts/imx6ull.dtsi
+index e8ed7c40caed..0421ae0e47b3 100644
+--- a/arch/arm/boot/dts/imx6ull.dtsi
++++ b/arch/arm/boot/dts/imx6ull.dtsi
+@@ -444,8 +444,8 @@
+ 				compatible = "fsl,imx6ul-pwm", "fsl,imx27-pwm";
+ 				reg = <0x02084000 0x4000>;
+ 				interrupts = <GIC_SPI 84 IRQ_TYPE_LEVEL_HIGH>;
+-				clocks = <&clks IMX6UL_CLK_DUMMY>,
+-					 <&clks IMX6UL_CLK_DUMMY>;
++				clocks = <&clks IMX6UL_CLK_PWM2>,
++					 <&clks IMX6UL_CLK_PWM2>;
+ 				clock-names = "ipg", "per";
+ 				#pwm-cells = <2>;
+ 			};
+@@ -464,8 +464,8 @@
+ 				compatible = "fsl,imx6ul-pwm", "fsl,imx27-pwm";
+ 				reg = <0x0208c000 0x4000>;
+ 				interrupts = <GIC_SPI 86 IRQ_TYPE_LEVEL_HIGH>;
+-				clocks = <&clks IMX6UL_CLK_DUMMY>,
+-					 <&clks IMX6UL_CLK_DUMMY>;
++				clocks = <&clks IMX6UL_CLK_PWM4>,
++					 <&clks IMX6UL_CLK_PWM4>;
+ 				clock-names = "ipg", "per";
+ 				#pwm-cells = <2>;
+ 			};
+@@ -795,8 +795,8 @@
+ 				compatible = "fsl,imx6ul-pwm", "fsl,imx27-pwm";
+ 				reg = <0x020f0000 0x4000>;
+ 				interrupts = <GIC_SPI 114 IRQ_TYPE_LEVEL_HIGH>;
+-				clocks = <&clks IMX6UL_CLK_DUMMY>,
+-					 <&clks IMX6UL_CLK_DUMMY>;
++				clocks = <&clks IMX6UL_CLK_PWM5>,
++					 <&clks IMX6UL_CLK_PWM5>;
+ 				clock-names = "ipg", "per";
+ 				#pwm-cells = <2>;
+ 			};
+@@ -805,8 +805,8 @@
+ 				compatible = "fsl,imx6ul-pwm", "fsl,imx27-pwm";
+ 				reg = <0x020f4000 0x4000>;
+ 				interrupts = <GIC_SPI 115 IRQ_TYPE_LEVEL_HIGH>;
+-				clocks = <&clks IMX6UL_CLK_DUMMY>,
+-					 <&clks IMX6UL_CLK_DUMMY>;
++				clocks = <&clks IMX6UL_CLK_PWM6>,
++					 <&clks IMX6UL_CLK_PWM6>;
+ 				clock-names = "ipg", "per";
+ 				#pwm-cells = <2>;
+ 			};
+@@ -815,8 +815,8 @@
+ 				compatible = "fsl,imx6ul-pwm", "fsl,imx27-pwm";
+ 				reg = <0x020f8000 0x4000>;
+ 				interrupts = <GIC_SPI 116 IRQ_TYPE_LEVEL_HIGH>;
+-				clocks = <&clks IMX6UL_CLK_DUMMY>,
+-					 <&clks IMX6UL_CLK_DUMMY>;
++				clocks = <&clks IMX6UL_CLK_PWM7>,
++					 <&clks IMX6UL_CLK_PWM7>;
+ 				clock-names = "ipg", "per";
+ 				#pwm-cells = <2>;
+ 			};
+@@ -825,8 +825,8 @@
+ 				compatible = "fsl,imx6ul-pwm", "fsl,imx27-pwm";
+ 				reg = <0x020fc000 0x4000>;
+ 				interrupts = <GIC_SPI 117 IRQ_TYPE_LEVEL_HIGH>;
+-				clocks = <&clks IMX6UL_CLK_DUMMY>,
+-					 <&clks IMX6UL_CLK_DUMMY>;
++				clocks = <&clks IMX6UL_CLK_PWM8>,
++					 <&clks IMX6UL_CLK_PWM8>;
+ 				clock-names = "ipg", "per";
+ 				#pwm-cells = <2>;
+ 			};
+diff --git a/copy.sh b/copy.sh
+new file mode 100644
+index 000000000000..3cf1a6fb8b69
+--- /dev/null
++++ b/copy.sh
+@@ -0,0 +1,40 @@
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/u-boot-emmc-2016.03-r0.imx /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/u-boot-emmc-2016.03-r0.imx /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/u-boot-nand-2016.03-r0.imx /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/u-boot-nand-2016.03-r0.imx /mnt/hgfs/my-file/
++
++cp /home/rich/SRC/kernel/arch/arm/boot/zImage /home/rich/image/
++
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-50-70.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-50-70.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dtb /mnt/hgfs/my-file/
++
++cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dtb
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-43.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-43.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-50-70.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-50-70.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-50-70-dht11.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-50-70-dht11.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-50-70-dht11-leds.dtb /home/rich/image/
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-50-70-dht11-leds.dtb /mnt/hgfs/my-file/
++
++#cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/fsl-image-qt5-imx6ull14x14evk.tar.bz2 /home/rich/image/
+diff --git a/drivers/iio/humidity/dht11.c b/drivers/iio/humidity/dht11.c
+index 3ebe6f9c927a..916785951ecc 100644
+--- a/drivers/iio/humidity/dht11.c
++++ b/drivers/iio/humidity/dht11.c
+@@ -105,8 +105,8 @@ static int dht11_decode(struct dht11 *dht11, int offset)
+ 		return -EIO;
+ 	}
+ 	threshold = DHT11_DATA_BIT_HIGH / timeres;
+-	if (DHT11_DATA_BIT_LOW/timeres + 1 >= threshold)
+-		pr_err("dht11: WARNING: decoding ambiguous\n");
++	/*if (DHT11_DATA_BIT_LOW/timeres + 1 >= threshold)	// pengjie del for DHT11
++		pr_err("dht11: WARNING: decoding ambiguous\n");*/
+ 
+ 	/* scale down with timeres and check validity */
+ 	for (i = 0; i < DHT11_BITS_PER_READ; ++i) {
+@@ -127,6 +127,7 @@ static int dht11_decode(struct dht11 *dht11, int offset)
+ 		return -EIO;
+ 
+ 	dht11->timestamp = iio_get_time_ns();
++#if 0
+ 	if (hum_int < 20) {  /* DHT22 */
+ 		dht11->temperature = (((temp_int & 0x7f) << 8) + temp_dec) *
+ 					((temp_int & 0x80) ? -100 : 100);
+@@ -140,7 +141,12 @@ static int dht11_decode(struct dht11 *dht11, int offset)
+ 			hum_int, hum_dec, temp_int, temp_dec);
+ 		return -EIO;
+ 	}
+-
++#endif 
++	dht11->temperature = temp_int;
++	dht11->humidity = hum_int;
++	dev_err(dht11->dev,
++		"DHT11: %d %d %d %d\n",
++		hum_int, hum_dec, temp_int, temp_dec);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/leds/led-core.c b/drivers/leds/led-core.c
+index 9886dace5ad2..d2129d4052eb 100644
+--- a/drivers/leds/led-core.c
++++ b/drivers/leds/led-core.c
+@@ -118,7 +118,7 @@ void led_set_brightness(struct led_classdev *led_cdev,
+ 			enum led_brightness brightness)
+ {
+ 	int ret = 0;
+-
++	printk("\n%s,    %s,    %d\n", __FILE__, __func__, __LINE__);
+ 	/* delay brightness setting if need to stop soft-blink timer */
+ 	if (led_cdev->blink_delay_on || led_cdev->blink_delay_off) {
+ 		led_cdev->delayed_set_value = brightness;
+diff --git a/drivers/leds/led-triggers.c b/drivers/leds/led-triggers.c
+index e8b1120f486d..ed08ef4a29c3 100644
+--- a/drivers/leds/led-triggers.c
++++ b/drivers/leds/led-triggers.c
+@@ -258,7 +258,7 @@ void led_trigger_event(struct led_trigger *trig,
+ 
+ 	if (!trig)
+ 		return;
+-
++	printk("\n%s,    %s,    %d\n", __FILE__, __func__, __LINE__);   // pengjie add 2019.8.26 21:27
+ 	read_lock(&trig->leddev_list_lock);
+ 	list_for_each_entry(led_cdev, &trig->led_cdevs, trig_list)
+ 		led_set_brightness(led_cdev, brightness);
+diff --git a/drivers/leds/leds-pwm.c b/drivers/leds/leds-pwm.c
+index 1d07e3e83d29..2394214753cd 100644
+--- a/drivers/leds/leds-pwm.c
++++ b/drivers/leds/leds-pwm.c
+@@ -106,7 +106,7 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
+ 	led_data->cdev.name = led->name;
+ 	led_data->cdev.default_trigger = led->default_trigger;
+ 	led_data->cdev.brightness_set = led_pwm_set;
+-	led_data->cdev.brightness = LED_OFF;
++	led_data->cdev.brightness = LED_HALF;
+ 	led_data->cdev.max_brightness = led->max_brightness;
+ 	led_data->cdev.flags = LED_CORE_SUSPENDRESUME;
+ 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index be86d920ab6d..82ae22845b3d 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -157,7 +157,7 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 	} else {
+ 		mmc_should_fail_request(host, mrq);
+ 
+-		led_trigger_event(host->led, LED_OFF);
++		//led_trigger_event(host->led, LED_OFF);    // pengjie del 2019.8.26 00:48
+ 
+ 		if (mrq->sbc) {
+ 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
+@@ -277,7 +277,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 		}
+ 	}
+ 	mmc_host_clk_hold(host);
+-	led_trigger_event(host->led, LED_FULL);
++	//led_trigger_event(host->led, LED_FULL);    // pengjie del 2019.8.26 00:48
+ 	__mmc_start_request(host, mrq);
+ 
+ 	return 0;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 74fb8fc13855..7a57a00be8a9 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -645,7 +645,7 @@ int mmc_add_host(struct mmc_host *host)
+ 	if (err)
+ 		return err;
+ 
+-	led_trigger_register_simple(dev_name(&host->class_dev), &host->led);
++	//led_trigger_register_simple(dev_name(&host->class_dev), &host->led);    // pengjie del 2019.8.26 00:48
+ 
+ #ifdef CONFIG_DEBUG_FS
+ 	mmc_add_host_debugfs(host);
+@@ -681,7 +681,7 @@ void mmc_remove_host(struct mmc_host *host)
+ 
+ 	device_del(&host->class_dev);
+ 
+-	led_trigger_unregister_simple(host->led);
++	//led_trigger_unregister_simple(host->led);    // pengjie del 2019.8.26 00:48
+ 
+ 	mmc_host_clk_exit(host);
+ }
+-- 
+2.17.1
+

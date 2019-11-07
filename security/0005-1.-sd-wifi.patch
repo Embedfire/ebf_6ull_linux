@@ -1,0 +1,134 @@
+From 109fe315cbc3c3639c66545f80cfed168e3d7710 Mon Sep 17 00:00:00 2001
+From: pengjie <jiejie.128@163.com>
+Date: Wed, 4 Sep 2019 01:34:54 +0800
+Subject: [PATCH 05/13] =?UTF-8?q?1.=E4=B8=BA=E4=BA=86=E5=90=AF=E5=8A=A8?=
+ =?UTF-8?q?=E4=B9=8B=E5=90=8E=E8=83=BD=E8=AF=86=E5=88=AB=E5=88=B0sd?=
+ =?UTF-8?q?=E5=8D=A1,=E5=B0=86wifi=E6=A8=A1=E5=BC=8F=E7=9A=84=E8=AE=BE?=
+ =?UTF-8?q?=E5=A4=87=E6=A0=91=E7=8B=AC=E7=AB=8B=E5=87=BA=E6=9D=A5?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: pengjie <jiejie.128@163.com>
+---
+ arch/arm/boot/dts/Makefile                               | 4 +++-
+ .../boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-WIFI.dts | 9 +++++++++
+ arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts             | 2 +-
+ .../dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-WIFI.dts | 9 +++++++++
+ .../dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts | 5 +++--
+ arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts        | 2 +-
+ arch/arm/boot/dts/imx6ull-14x14-evk.dts                  | 2 +-
+ 7 files changed, 27 insertions(+), 6 deletions(-)
+ create mode 100644 arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-WIFI.dts
+ create mode 100644 arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-WIFI.dts
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index e4b6b110e9ac..fa7c03ae3d36 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -423,12 +423,14 @@ dtb-$(CONFIG_SOC_IMX6ULL) += \
+ 	imx6ull-14x14-evk-gpmi-weim-50-70.dtb \
+ 	imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dtb \
+ 	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dtb \
++	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dtb \
++	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-WIFI.dtb \
+ 	imx6ull-14x14-evk-emmc-43.dtb \
+ 	imx6ull-14x14-evk-emmc-50-70.dtb \
+ 	imx6ull-14x14-evk-emmc-50-70-dht11.dtb \
+ 	imx6ull-14x14-evk-emmc-50-70-dht11-leds.dtb \
+-	imx6ull-14x14-evk-gpmi-weim-50-70-dht11-update.dtb \
+ 	imx6ull-14x14-evk-emmc-50-70-dht11-update.dtb \
++	imx6ull-14x14-evk-emmc-50-70-dht11-WIFI.dtb \
+ 	imx6ull-9x9-evk.dtb \
+ 	imx6ull-9x9-evk-btwifi.dtb \
+ 	imx6ull-9x9-evk-ldo.dtb
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-WIFI.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-WIFI.dts
+new file mode 100644
+index 000000000000..118f508b3c99
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-WIFI.dts
+@@ -0,0 +1,9 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++#include "imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts"
++#include "imx6ul-evk-btwifi.dtsi"
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts
+index 5f4daf4664e0..b1e8a8415332 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts
+@@ -9,7 +9,7 @@
+ #include "imx6ull-14x14-evk.dts"
+ 
+ /*add by pengjie for bt/wifi*/
+-#include "imx6ul-evk-btwifi.dtsi"
++/*#include "imx6ul-evk-btwifi.dtsi"*/
+ 
+ &usdhc2 {
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-WIFI.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-WIFI.dts
+new file mode 100644
+index 000000000000..d4e6f4338c40
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-WIFI.dts
+@@ -0,0 +1,9 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++#include "imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts"
++#include "imx6ul-evk-btwifi.dtsi"
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
+index b326f2ea3c9e..7b8138daceb7 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
+@@ -38,10 +38,11 @@
+ 
+ 	ir_recv:ir-receiver {
+ 			compatible = "gpio-ir-receiver";
+-			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
+-			/*gpios = <&pinctrl_remote_control>;*/
++			#gpio-cells = <1>;
++			gpios = <&gpio1 21 GPIO_ACTIVE_LOW>;
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&pinctrl_remote_control>;
++			linux,rc-map-name = "rc-tbs-nec";
+ 			status = "okay";
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts
+index 4a4028bd5ae6..add9d69fb29e 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts
+@@ -9,7 +9,7 @@
+ #include "imx6ull-14x14-evk.dts"
+ 
+ /*add by pengjie for bt/wifi*/
+-#include "imx6ul-evk-btwifi.dtsi"
++/*#include "imx6ul-evk-btwifi.dtsi"*/
+ 
+ &gpmi {
+ 	pinctrl-names = "default";
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk.dts b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+index 13d933df3a04..8aa818a9e251 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+@@ -234,7 +234,7 @@
+ 		reset-gpios = <&gpio_spi 0 GPIO_ACTIVE_LOW>;
+ 		reset-delay-us = <100000>;
+ 		#reset-cells = <0>;
+-		status = "disabled";
++		status = "okay";
+ 	};
+ 
+ 	ds18b20{
+-- 
+2.17.1
+

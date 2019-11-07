@@ -1,0 +1,26 @@
+From 2b0762522ce624a3098706fa63edb64605f5e9b6 Mon Sep 17 00:00:00 2001
+From: pengjie <jiejie.128@163.com>
+Date: Fri, 23 Aug 2019 21:34:41 +0800
+Subject: [PATCH 03/13] Modified dht.c.
+
+Signed-off-by: pengjie <jiejie.128@163.com>
+---
+ drivers/iio/humidity/dht11.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/iio/humidity/dht11.c b/drivers/iio/humidity/dht11.c
+index 7d79a1ac5f5f..3ebe6f9c927a 100644
+--- a/drivers/iio/humidity/dht11.c
++++ b/drivers/iio/humidity/dht11.c
+@@ -40,7 +40,7 @@
+ 
+ #define DHT11_DATA_VALID_TIME	2000000000  /* 2s in ns */
+ 
+-#define DHT11_EDGES_PREAMBLE 2
++#define DHT11_EDGES_PREAMBLE 1
+ #define DHT11_BITS_PER_READ 40
+ /*
+  * Note that when reading the sensor actually 84 edges are detected, but
+-- 
+2.17.1
+

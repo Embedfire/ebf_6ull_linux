@@ -1,0 +1,162 @@
+From cd28e7b3bdf4cba6a4c1929378ca39447cde10a1 Mon Sep 17 00:00:00 2001
+From: pengjie <jiejie.128@163.com>
+Date: Thu, 10 Oct 2019 23:24:18 +0800
+Subject: [PATCH 11/13] =?UTF-8?q?1.=E5=B0=86dht11=E5=92=8Ccam=E5=90=88?=
+ =?UTF-8?q?=E5=9C=A8=E4=B8=80=E8=B5=B7=E6=88=90=E4=B8=BA=E4=B8=80=E4=B8=AA?=
+ =?UTF-8?q?=E8=AE=BE=E5=A4=87=E6=A0=91=202.=E4=BF=AE=E6=94=B9cam=E7=9A=84?=
+ =?UTF-8?q?=E9=95=9C=E5=83=8F=E5=AF=84=E5=AD=98=E5=99=A8?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: pengjie <jiejie.128@163.com>
+---
+ arch/arm/boot/dts/Makefile                      |  4 ++--
+ ...dts => imx6ull-14x14-evk-emmc-cam-dht11.dts} | 17 -----------------
+ ...> imx6ull-14x14-evk-gpmi-weim-cam-dht11.dts} | 17 -----------------
+ copy.sh                                         |  6 +++---
+ drivers/media/platform/mxc/subdev/ov5640.c      |  6 +++---
+ 5 files changed, 8 insertions(+), 42 deletions(-)
+ rename arch/arm/boot/dts/{imx6ull-14x14-evk-emmc-cam-18b20.dts => imx6ull-14x14-evk-emmc-cam-dht11.dts} (80%)
+ rename arch/arm/boot/dts/{imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts => imx6ull-14x14-evk-gpmi-weim-cam-dht11.dts} (80%)
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index d4c8af8ee706..feea01ecb5c4 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -407,8 +407,8 @@ dtb-$(CONFIG_SOC_IMX6ULL) += \
+ 	imx6ull-14x14-evk-emmc-hdmi.dtb \
+ 	imx6ull-14x14-evk-gpmi-weim-wifi.dtb \
+ 	imx6ull-14x14-evk-emmc-wifi.dtb \
+-	imx6ull-14x14-evk-gpmi-weim-cam-18b20.dtb \
+-	imx6ull-14x14-evk-emmc-cam-18b20.dtb
++	imx6ull-14x14-evk-gpmi-weim-cam-dht11.dtb \
++	imx6ull-14x14-evk-emmc-cam-dht11.dtb
+ dtb-$(CONFIG_SOC_IMX6SLL) += \
+ 	imx6sll-lpddr2-arm2.dtb \
+ 	imx6sll-lpddr3-arm2.dtb \
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-18b20.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-dht11.dts
+similarity index 80%
+rename from arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-18b20.dts
+rename to arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-dht11.dts
+index 0b56ad46e4b1..8306e6902f76 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-18b20.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-dht11.dts
+@@ -35,23 +35,6 @@
+ 		};
+ 	};
+ 
+-	ds18b20{
+-		compatible = "w1-gpio";
+-		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+-		linux,open-drain;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_onewire>;
+-		status = "okay";
+-	};
+-
+-	dht11{
+-		compatible = "dht11";
+-		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+-		linux,open-drain;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_onewire>;
+-		status = "disable";
+-	};
+ };
+ 
+ &pwm3 {
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-dht11.dts
+similarity index 80%
+rename from arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts
+rename to arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-dht11.dts
+index 5d2482db1567..841ef6ea82fc 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-dht11.dts
+@@ -35,23 +35,6 @@
+ 		};
+ 	};
+ 
+-	ds18b20{
+-		compatible = "w1-gpio";
+-		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+-		linux,open-drain;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_onewire>;
+-		status = "okay";
+-	};
+-
+-	dht11{
+-		compatible = "dht11";
+-		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+-		linux,open-drain;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_onewire>;
+-		status = "disable";
+-	};
+ };
+ 
+ &pwm3 {
+diff --git a/copy.sh b/copy.sh
+index 746071ff6630..a6ef83a75907 100644
+--- a/copy.sh
++++ b/copy.sh
+@@ -7,13 +7,13 @@
+ cp /home/rich/SRC/kernel/arch/arm/boot/zImage /home/rich/image/
+ 
+ 
+-cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim.dtb
++#cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim.dtb
+ #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim.dtb /home/rich/image/
+ #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim.dtb /mnt/hgfs/my-file/
+ 
+ cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-43.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb
+ cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-hdmi.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-hdmi.dtb
+-cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-cam-18b20.dtb
++cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-dht11.dtb /home/rich/image/zImage-imx6ull-14x14-evk-gpmi-weim-cam-dht11.dtb
+ #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb /home/rich/image/
+ #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-gpmi-weim-43.dtb /mnt/hgfs/my-file/
+ 
+@@ -32,7 +32,7 @@ cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dtb /home/rich
+ 
+ cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-43.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-43.dtb
+ cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-hdmi.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-hdmi.dtb
+-cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-18b20.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-cam-18b20.dtb
++cp /home/rich/SRC/kernel/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-cam-dht11.dtb /home/rich/image/zImage-imx6ull-14x14-evk-emmc-cam-dht11.dtb
+ #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-43.dtb /home/rich/image/
+ #cp /home/rich/fsl-release-bsp/build/tmp/deploy/images/imx6ull14x14evk/zImage-imx6ull-14x14-evk-emmc-43.dtb /mnt/hgfs/my-file/
+ 
+diff --git a/drivers/media/platform/mxc/subdev/ov5640.c b/drivers/media/platform/mxc/subdev/ov5640.c
+index 2187f559a943..835a35aa02d1 100644
+--- a/drivers/media/platform/mxc/subdev/ov5640.c
++++ b/drivers/media/platform/mxc/subdev/ov5640.c
+@@ -258,7 +258,7 @@ static struct reg_value ov5640_setting_30fps_VGA_640_480[] = {
+ };
+ 
+ static struct reg_value ov5640_setting_15fps_VGA_640_480[] = {
+-	{0x3c07, 0x08, 0, 0}, {0x3820, 0x41, 0, 0}, {0x3821, 0x07, 0, 0},
++	{0x3c07, 0x08, 0, 0}, {0x3820, 0x46, 0, 0}, {0x3821, 0x07, 0, 0},    // pengjie 20191010   mirror and flip
+ 	{0x3814, 0x31, 0, 0}, {0x3815, 0x31, 0, 0}, {0x3800, 0x00, 0, 0},
+ 	{0x3801, 0x00, 0, 0}, {0x3802, 0x00, 0, 0}, {0x3803, 0x04, 0, 0},
+ 	{0x3804, 0x0a, 0, 0}, {0x3805, 0x3f, 0, 0}, {0x3806, 0x07, 0, 0},
+@@ -276,7 +276,7 @@ static struct reg_value ov5640_setting_15fps_VGA_640_480[] = {
+ };
+ 
+ static struct reg_value ov5640_setting_30fps_QVGA_320_240[] = {
+-	{0x3c07, 0x08, 0, 0}, {0x3820, 0x41, 0, 0}, {0x3821, 0x07, 0, 0},
++	{0x3c07, 0x08, 0, 0}, {0x3820, 0x46, 0, 0}, {0x3821, 0x07, 0, 0},    // pengjie 20191010   mirror and flip
+ 	{0x3814, 0x31, 0, 0}, {0x3815, 0x31, 0, 0}, {0x3800, 0x00, 0, 0},
+ 	{0x3801, 0x00, 0, 0}, {0x3802, 0x00, 0, 0}, {0x3803, 0x04, 0, 0},
+ 	{0x3804, 0x0a, 0, 0}, {0x3805, 0x3f, 0, 0}, {0x3806, 0x07, 0, 0},
+@@ -294,7 +294,7 @@ static struct reg_value ov5640_setting_30fps_QVGA_320_240[] = {
+ };
+ 
+ static struct reg_value ov5640_setting_15fps_QVGA_320_240[] = {
+-	{0x3c07, 0x08, 0, 0}, {0x3820, 0x41, 0, 0}, {0x3821, 0x07, 0, 0},
++	{0x3c07, 0x08, 0, 0}, {0x3820, 0x46, 0, 0}, {0x3821, 0x07, 0, 0},    // pengjie 20191010   mirror and flip
+ 	{0x3814, 0x31, 0, 0}, {0x3815, 0x31, 0, 0}, {0x3800, 0x00, 0, 0},
+ 	{0x3801, 0x00, 0, 0}, {0x3802, 0x00, 0, 0}, {0x3803, 0x04, 0, 0},
+ 	{0x3804, 0x0a, 0, 0}, {0x3805, 0x3f, 0, 0}, {0x3806, 0x07, 0, 0},
+-- 
+2.17.1
+

@@ -1,0 +1,731 @@
+From 648335c96818e83eeb87144ecd06ee6b0ac665cd Mon Sep 17 00:00:00 2001
+From: pengjie <jiejie.128@163.com>
+Date: Mon, 12 Aug 2019 23:24:28 +0800
+Subject: [PATCH 02/13] =?UTF-8?q?=E6=B7=BB=E5=8A=A0ADC&18B20&DHT11?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: pengjie <jiejie.128@163.com>
+---
+ arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi      |   2 +-
+ .../boot/dts/imx6ull-14x14-evk-emmc-43.dts    |  24 +--
+ ...mx6ull-14x14-evk-emmc-50-70-dht11-leds.dts |  84 ++++++++++
+ .../imx6ull-14x14-evk-emmc-50-70-dht11.dts    |  24 +++
+ .../boot/dts/imx6ull-14x14-evk-emmc-50-70.dts |  31 +---
+ ...l-14x14-evk-gpmi-weim-50-70-dht11-leds.dts |  85 ++++++++++
+ ...x6ull-14x14-evk-gpmi-weim-50-70-dht11.dts} |  20 ++-
+ .../dts/imx6ull-14x14-evk-gpmi-weim-50-70.dts |   9 +-
+ arch/arm/boot/dts/imx6ull-14x14-evk.dts       | 155 ++++++++++--------
+ 9 files changed, 313 insertions(+), 121 deletions(-)
+ create mode 100644 arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts
+ create mode 100644 arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11.dts
+ create mode 100644 arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
+ rename arch/arm/boot/dts/{imx6ull-14x14-evk-gpmi-weim-50-70-w1.dts => imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dts} (58%)
+
+diff --git a/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi b/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi
+index 5a56d1c50de8..1bfe5d2ff196 100644
+--- a/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi
++++ b/arch/arm/boot/dts/imx6ul-evk-btwifi.dtsi
+@@ -41,7 +41,7 @@
+ 	};
+ };
+ 
+-&reg_sd1_vmmc {
++&reg_wifi_vmmc {
+ 	regulator-always-on;
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-43.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-43.dts
+index 4c6dab447241..89ae38454eed 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-43.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-43.dts
+@@ -20,19 +20,19 @@
+ 		bus-width = <24>;
+ 
+ 		display-timings {
+-			native-mode = <&timing1>;
++			native-mode = <&timing0>;
+ 
+-			timing1: timing1 {
+-			mode_name = "TFT50AB";
+-			clock-frequency = <27000000>;
+-			hactive = <800>;
+-			vactive = <480>;
+-			hfront-porch = <23>;
+-			hback-porch = <46>;
+-			hsync-len = <1>;
+-			vback-porch = <22>;
+-			vfront-porch = <22>;
+-			vsync-len = <1>;
++			timing0: timing0 {
++			mode_name = "TFT43AB";
++			clock-frequency = <9000000>;
++			hactive = <480>;
++			vactive = <272>;
++			hfront-porch = <8>;
++			hback-porch = <2>;
++			hsync-len = <41>;
++			vback-porch = <4>;
++			vfront-porch = <4>;
++			vsync-len = <10>;
+ 
+ 			hsync-active = <0>;
+ 			vsync-active = <0>;
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts
+new file mode 100644
+index 000000000000..f1b089ab3d3c
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11-leds.dts
+@@ -0,0 +1,84 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include "imx6ull-14x14-evk-emmc-50-70-dht11.dts"
++
++/{
++/*
++	pwm_leds{
++		compatible = "pwm-leds";
++		status = "okay";
++		red {
++			label = "imx6:red:led1";
++			pwms = <&pwm3 0 500000 0>;
++			linux,default-trigger = "backlight";
++			max-brightness = <255>;
++		};
++
++		green {
++			label = "imx6:green:led2";
++			pwms = <&pwm7 0 500000 0>;
++			linux,default-trigger = "backlight";
++			max-brightness = <255>;
++		};
++
++		blue {
++			label =  "imx6:blue:led3";
++			pwms = <&pwm8 0 500000 0>;
++			linux,default-trigger = "backlight";
++			max-brightness = <255>;
++		};
++	};
++	*/
++	ir-receiver {
++			compatible = "gpio-ir-receiver";
++			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
++			gpios = <&pinctrl_remote_control>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&pinctrl_remote_control>;
++			status = "disable";
++	};
++};
++
++&csi {
++	status = "disable";
++	};
++
++
++&i2c2 {
++	ov5640: ov5640@3c {
++		status = "disable";
++		};
++	};
++/*
++&pwm3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm3>;
++	status = "okay";
++};
++
++&pwm7 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm7>;
++	status = "okay";
++};
++
++&pwm8 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm8>;
++	status = "okay";
++};
++*/
++
++&uart2{
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_485>;
++	fsl,rs485-gpio-txen = <&gpio1 18 GPIO_ACTIVE_HIGH>;
++	linux,rs485-enabled-at-boot-time;
++	status = "okay";
++};
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11.dts
+new file mode 100644
+index 000000000000..fd24832267c2
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70-dht11.dts
+@@ -0,0 +1,24 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include "imx6ull-14x14-evk-emmc-50-70.dts"
++
++/{
++	ds18b20{
++		status = "disable";
++	};
++	dht11{
++		compatible = "dht11";
++		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
++		linux,open-drain;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_onewire>;
++		status = "okay";
++	};
++};
++
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70.dts
+index a0861fa20413..e285a1155d5f 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc-50-70.dts
+@@ -20,9 +20,9 @@
+ 		bus-width = <24>;
+ 
+ 		display-timings {
+-			native-mode = <&timing1>;
++			native-mode = <&timing0>;
+ 
+-			timing1: timing1 {
++			timing0: timing0 {
+ 			mode_name = "TFT50AB";
+ 			clock-frequency = <27000000>;
+ 			hactive = <800>;
+@@ -54,14 +54,6 @@
+ 		reg = <0x68>;
+ 		position = <1>;
+ 	};
+-	/*
+-	gt9157@5d {
+-		compatible = "goodix,gt9157";
+-		reg = <0x5d>;
+-		interrupt-parent = <&gpio5>;
+-		interrupts = <9 GPIO_ACTIVE_HIGH>;
+-		gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
+-	};*/
+ 
+ 	gt9xx@5d {
+ 		compatible = "goodix,gt9xx";
+@@ -83,8 +75,8 @@
+ 		irq-flags = <2>;		/*1:rising 2: falling*/
+ 
+ 		touchscreen-max-id = <1>;
+-		touchscreen-size-x = <480>;
+-		touchscreen-size-y = <272>;
++		touchscreen-size-x = <800>;
++		touchscreen-size-y = <480>;
+ 		touchscreen-max-w = <1024>;
+ 		touchscreen-max-p = <1024>;
+ 		/*touchscreen-key-map = <172>, <158>;*/ /*KEY_HOMEPAGE, KEY_BACK*/
+@@ -175,21 +167,6 @@
+ 		00 FF FF FF FF FF FF FF FF FF
+ 		FF FF FF FF 48 01
+ 		];
+-
+ 	};
+-	/*
+-	mag3110@0e {
+-		compatible = "fsl,mag3110";
+-		reg = <0x0e>;
+-		position = <2>;
+-	};
+-
+-	fxls8471@1e {
+-		compatible = "fsl,fxls8471";
+-		reg = <0x1e>;
+-		position = <0>;
+-		interrupt-parent = <&gpio5>;
+-		interrupts = <0 8>;
+-	};*/
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
+new file mode 100644
+index 000000000000..51a20bc4f458
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11-leds.dts
+@@ -0,0 +1,85 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include "imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dts"
++
++/{
++/*
++	pwm_leds{
++		compatible = "pwm-leds";
++		status = "okay";
++		red {
++			label = "imx6:red:led1";
++			pwms = <&pwm3 0 500000 0>;
++			linux,default-trigger = "backlight";
++			max-brightness = <255>;
++		};
++
++		green {
++			label = "imx6:green:led2";
++			pwms = <&pwm7 0 500000 0>;
++			linux,default-trigger = "backlight";
++			max-brightness = <255>;
++		};
++
++		blue {
++			label =  "imx6:blue:led3";
++			pwms = <&pwm8 0 500000 0>;
++			linux,default-trigger = "backlight";
++			max-brightness = <255>;
++		};
++	};
++	*/
++	ir-receiver {
++			compatible = "gpio-ir-receiver";
++			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
++			gpios = <&pinctrl_remote_control>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&pinctrl_remote_control>;
++			status = "disable";
++	};
++};
++
++&csi {
++	status = "disable";
++	};
++
++
++&i2c2 {
++	ov5640: ov5640@3c {
++		status = "disable";
++		};
++	};
++/*
++&pwm3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm3>;
++	status = "okay";
++};
++
++&pwm7 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm7>;
++	status = "okay";
++};
++
++&pwm8 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm8>;
++	status = "okay";
++};
++*/
++
++&uart2{
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_485>;
++	fsl,rs485-gpio-txen = <&gpio1 18 GPIO_ACTIVE_HIGH>;
++	linux,rs485-enabled-at-boot-time;
++	status = "okay";
++};
++
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-w1.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dts
+similarity index 58%
+rename from arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-w1.dts
+rename to arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dts
+index 38fb17c498f3..d3543203f39c 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-w1.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70-dht11.dts
+@@ -8,13 +8,17 @@
+ 
+ #include "imx6ull-14x14-evk-gpmi-weim-50-70.dts"
+ 
+-&onewire @0{
+-	compatible = "fsl,imx21-owire";
+-	gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+-	linux,open-drain;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_onewire>;
+-	status = "okay";
++/{
++	ds18b20{
++		status = "disable";
++	};
++	dht11{
++		compatible = "dht11";
++		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
++		linux,open-drain;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_onewire>;
++		status = "okay";
++	};
+ };
+ 
+-
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70.dts
+index 6eb410f068f4..0eb1ea97039d 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-50-70.dts
+@@ -20,9 +20,9 @@
+ 		bus-width = <24>;
+ 
+ 		display-timings {
+-			native-mode = <&timing1>;
++			native-mode = <&timing0>;
+ 
+-			timing1: timing1 {
++			timing0: timing0 {
+ 			mode_name = "TFT50AB";
+ 			clock-frequency = <27000000>;
+ 			hactive = <800>;
+@@ -75,8 +75,8 @@
+ 		irq-flags = <2>;		/*1:rising 2: falling*/
+ 
+ 		touchscreen-max-id = <1>;
+-		touchscreen-size-x = <480>;
+-		touchscreen-size-y = <272>;
++		touchscreen-size-x = <800>;
++		touchscreen-size-y = <480>;
+ 		touchscreen-max-w = <1024>;
+ 		touchscreen-max-p = <1024>;
+ 		/*touchscreen-key-map = <172>, <158>;*/ /*KEY_HOMEPAGE, KEY_BACK*/
+@@ -170,4 +170,3 @@
+ 	};
+ };
+ 
+-
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk.dts b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+index d2ca43f185eb..f41f85f899ca 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+@@ -48,14 +48,6 @@
+ 		compatible = "fsl,imx6ul-pxp-v4l2", "fsl,imx6sx-pxp-v4l2", "fsl,imx6sl-pxp-v4l2";
+ 		status = "okay";
+ 	};
+-	/*
+-	ir-receiver {
+-			compatible = "gpio-ir-receiver";
+-			gpios = <&gpio1 1 1>;
+-			pinctrl-names = "default";
+-			pinctrl-0 = <&pinctrl_remote_control>;
+-	};
+-	*/
+ 
+ 	regulators {
+ 		compatible = "simple-bus";
+@@ -71,12 +63,12 @@
+ 			/*gpios = <&gpio_spi 3 GPIO_ACTIVE_LOW>;*/
+ 		};
+ 
+-		reg_sd1_vmmc: regulator@1 {
++		reg_wifi_vmmc: regulator@1 {
+ 			compatible = "regulator-fixed";
+ 			regulator-name = "VSD_3V3";
+ 			regulator-min-microvolt = <3300000>;
+ 			regulator-max-microvolt = <3300000>;
+-			/*gpio = <&gpio1 1 GPIO_ACTIVE_HIGH>;*/
++			gpio = <&gpio1 1 GPIO_ACTIVE_HIGH>;
+ 			enable-active-high;
+ 		};
+ 		reg_vref_3v3: regulator@2 {
+@@ -99,17 +91,18 @@
+ 		};
+ 
+ 		reg_bt: regulator-bt-reg {
+-				compatible = "regulator-gpio";
+-				pinctrl-names = "default";
+-				pinctrl-0 = <&pinctrl_dvfs>;
+-				regulator-min-microvolt = <1300000>;
+-				regulator-max-microvolt = <1400000>;
+-				regulator-name = "gpio_dvfs";
+-				regulator-type = "voltage";
+-				gpios = <&gpio5 3 GPIO_ACTIVE_HIGH>;
+-				states = <1300000 0x1 1400000 0x0>;
++			compatible = "regulator-gpio";
++			pinctrl-names = "default";
++			pinctrl-0 = <&pinctrl_dvfs>;
++			regulator-min-microvolt = <1300000>;
++			regulator-max-microvolt = <1400000>;
++			regulator-name = "gpio_dvfs";
++			regulator-type = "voltage";
++			gpios = <&gpio5 3 GPIO_ACTIVE_HIGH>;
++			states = <1300000 0x1 1400000 0x0>;
+ 		};*/
+ 	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 		pinctrl-names = "default";
+@@ -122,28 +115,49 @@
+ 			linux,default-trigger = "heartbeat";
+ 		};
+ 	};
+-/*
++
+ 	pwm_leds{
+ 		compatible = "pwm-leds";
++		status = "disable";
+ 		red {
+ 			label = "red";
+-			pwms = <&pwm3 0 5000000>;
++			pwms = <&pwm3 0 500000>;
+ 			max-brightness = <255>;
+ 		};
+ 
+ 		green {
+ 			label = "green";
+-			pwms = <&pwm7 0 5000000>;
++			pwms = <&pwm7 0 500000>;
+ 			max-brightness = <255>;
+ 		};
+ 
+ 		blue {
+ 			label = "blue";
+-			pwms = <&pwm8 0 5000000>;
++			pwms = <&pwm8 0 500000>;
+ 			max-brightness = <255>;
+ 		};
+ 	};
+-	*/
++
++	gpio-keys {
++			compatible = "gpio-keys";
++			pinctrl-names = "default";
++			pinctrl-0 = <&pinctrl_gpio_keys>;
++
++			Key0{
++				label = "Key 0";
++				gpios = <&gpio5 1 GPIO_ACTIVE_HIGH>;
++				linux,code = <KEY_0>;
++		};
++	};
++
++	ir-receiver {
++			compatible = "gpio-ir-receiver";
++			/*gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
++			pinctrl-names = "default";
++			pinctrl-0 = <&pinctrl_remote_control>;
++			status = "disable";
++	};
++
+ 	sound {
+ 		compatible = "fsl,imx6ul-evk-wm8960",
+ 			   "fsl,imx-audio-wm8960";
+@@ -214,6 +228,23 @@
+ 		spdif-out;
+ 	};
+ 
++	sii902x_reset: sii902x-reset {
++		compatible = "gpio-reset";
++		reset-gpios = <&gpio_spi 0 GPIO_ACTIVE_LOW>;
++		reset-delay-us = <100000>;
++		#reset-cells = <0>;
++		status = "disabled";
++	};
++
++	ds18b20{
++		compatible = "w1-gpio";
++		gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
++		linux,open-drain;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_onewire>;
++		status = "okay";
++	};
++
+ };
+ 
+ &cpu0 {
+@@ -301,14 +332,6 @@
+ 		reg = <0x68>;
+ 		position = <1>;
+ 	};
+-	/*
+-	gt9157@5d {
+-		compatible = "goodix,gt9157";
+-		reg = <0x5d>;
+-		interrupt-parent = <&gpio5>;
+-		interrupts = <9 GPIO_ACTIVE_HIGH>;
+-		gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
+-	};*/
+ 
+ 	gt9xx@5d {
+ 		compatible = "goodix,gt9xx";
+@@ -458,11 +481,13 @@
+ 		compatible = "SiI,sii902x";
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_sii902x>;
++		resets = <&sii902x_reset>;
+ 		interrupt-parent = <&gpio1>;
+ 		interrupts = <18 IRQ_TYPE_EDGE_FALLING>;
+-		mode_str ="1366x768M@60";
++		mode_str ="1280x720M@60";
+ 		bits-per-pixel = <16>;
+ 		reg = <0x39>;
++
+ 		status = "okay";
+ 	};
+ 
+@@ -489,20 +514,12 @@
+ 
+ &iomuxc {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_beep>;
+ 	imx6ul-evk {
+-		/*pinctrl_remote_control: remote_control {
++		pinctrl_remote_control: remote_control {
+ 			fsl,pins = <
+-				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0x1b0b1 /* remote control        add by pengjie 20190703
++				MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x000010B1 /* remote control        add by pengjie 20190703*/
+ 			>;
+-		};*/
+-		/*pinctrl_hog_1: hoggrp-1 {
+-			fsl,pins = <
+-				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19	0x17059 /* SD1 CD 
+-				MX6UL_PAD_GPIO1_IO05__USDHC1_VSELECT	0x17059 /* SD1 VSELECT 
+-				/*MX6UL_PAD_GPIO1_IO09__GPIO1_IO09	0x17059  SD1 RESET 
+-			>;
+-		};*/
++		};
+ 
+ 		pinctrl_csi1: csi1grp {
+ 			fsl,pins = <
+@@ -667,15 +684,6 @@
+ 			>;
+ 		};
+ 
+-		/*
+-		pinctrl_tsc: tscgrp {
+-			fsl,pins = <
+-				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0xb0
+-				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02	0xb0
+-				MX6UL_PAD_GPIO1_IO03__GPIO1_IO03	0xb0
+-				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0xb0
+-			>;
+-		};*/
+ 		/* delete by pengjie*/
+ 		pinctrl_uart1: uart1grp {
+ 			fsl,pins = <
+@@ -811,9 +819,10 @@
+ 			>;
+ 		};
+ 
+-		pinctrl_onewire: onewire@0 {
++		pinctrl_onewire: onewire {
+ 			fsl,pins = <
+-				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02	0x000038B1
++				//MX6UL_PAD_GPIO1_IO02__GPIO1_IO02          0x000090B1     DHT11
++				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02          0x400138B1
+ 			>;
+ 		};
+ 
+@@ -825,15 +834,16 @@
+ 
+ 		pinctrl_adc1: adc1grp{
+ 			fsl,pins = <
+-				MX6UL_PAD_GPIO1_IO03__GPIO1_IO03    0xB0
++				MX6UL_PAD_GPIO1_IO03__GPIO1_IO03          0x000010B1
+ 			>;
+ 		};
+-
++/*
+ 		pinctrl_beep: beepgrp{
+ 			fsl,pins = <
+-				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19    0x010B0
++				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19    0x000050B1
+ 			>;
+ 		};
++*/
+ 	};
+ };
+ 
+@@ -854,6 +864,11 @@
+ 			>;
+ 		};
+ 		*/
++		pinctrl_gpio_keys: keysgrp{
++			fsl,pins = <
++				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01      0x000110A1
++			>;
++		};
+ 		pinctrl_spi4: spi4grp {
+ 			fsl,pins = <
+ 				MX6ULL_PAD_BOOT_MODE0__GPIO5_IO10		0x70a1
+@@ -958,25 +973,25 @@
+ 	pinctrl-0 = <&pinctrl_pwm1>;
+ 	status = "okay";
+ };
+-/*
++
+ &pwm3 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pwm3>;
+-	status = "okay";
++	status = "diable";
+ };
+ 
+ &pwm7 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pwm7>;
+-	status = "okay";
++	status = "diable";
+ };
+ 
+ &pwm8 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pwm8>;
+-	status = "okay";
++	status = "diable";
+ };
+-*/
++
+ &pxp {
+ 	status = "okay";
+ };
+@@ -1073,10 +1088,10 @@
+ 	pinctrl-0 = <&pinctrl_usdhc1>;
+ 	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
+ 	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
+-	/*cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;*/
+-	/*keep-power-in-suspend;*/
+-	/*enable-sdio-wakeup;*/
+-	/*vmmc-supply = <&reg_sd1_vmmc>;*/
++	/*cd-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;*/
++	keep-power-in-suspend;
++	enable-sdio-wakeup;
++	vmmc-supply = <&reg_wifi_vmmc>;
+ 	status = "okay";
+ };
+ 
+@@ -1108,6 +1123,10 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_adc1>;
+ 	vref-supply = <&reg_vref_3v3>;
+-	num-channels = <1>; 			//此参数为ADC的个数
++	num-channels = <4>; 			//此参数为ADC的个数
+ 	status = "okay";
+ };
++
++&gpt2 {
++    status = "okay";
++};
+-- 
+2.17.1
+

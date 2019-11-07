@@ -1,0 +1,171 @@
+config CRYPTO_DEV_FSL_CAAM
+	tristate "Freescale CAAM-Multicore driver backend"
+	depends on FSL_SOC || ARCH_MXC
+	help
+	  Enables the driver module for Freescale's Cryptographic Accelerator
+	  and Assurance Module (CAAM), also known as the SEC version 4 (SEC4).
+	  This module creates job ring devices, and configures h/w
+	  to operate as a DPAA component automatically, depending
+	  on h/w feature availability.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called caam.
+
+config CRYPTO_DEV_FSL_CAAM_JR
+	tristate "Freescale CAAM Job Ring driver backend"
+	depends on CRYPTO_DEV_FSL_CAAM
+	default y
+	help
+	  Enables the driver module for Job Rings which are part of
+	  Freescale's Cryptographic Accelerator
+	  and Assurance Module (CAAM). This module adds a job ring operation
+	  interface.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called caam_jr.
+
+config CRYPTO_DEV_FSL_CAAM_RINGSIZE
+	int "Job Ring size"
+	depends on CRYPTO_DEV_FSL_CAAM_JR
+	range 2 9
+	default "9"
+	help
+	  Select size of Job Rings as a power of 2, within the
+	  range 2-9 (ring size 4-512).
+	  Examples:
+		2 => 4
+		3 => 8
+		4 => 16
+		5 => 32
+		6 => 64
+		7 => 128
+		8 => 256
+		9 => 512
+
+config CRYPTO_DEV_FSL_CAAM_INTC
+	bool "Job Ring interrupt coalescing"
+	depends on CRYPTO_DEV_FSL_CAAM_JR
+	default n
+	help
+	  Enable the Job Ring's interrupt coalescing feature.
+
+	  Note: the driver already provides adequate
+	  interrupt coalescing in software.
+
+config CRYPTO_DEV_FSL_CAAM_INTC_COUNT_THLD
+	int "Job Ring interrupt coalescing count threshold"
+	depends on CRYPTO_DEV_FSL_CAAM_INTC
+	range 1 255
+	default 255
+	help
+	  Select number of descriptor completions to queue before
+	  raising an interrupt, in the range 1-255. Note that a selection
+	  of 1 functionally defeats the coalescing feature, and a selection
+	  equal or greater than the job ring size will force timeouts.
+
+config CRYPTO_DEV_FSL_CAAM_INTC_TIME_THLD
+	int "Job Ring interrupt coalescing timer threshold"
+	depends on CRYPTO_DEV_FSL_CAAM_INTC
+	range 1 65535
+	default 2048
+	help
+	  Select number of bus clocks/64 to timeout in the case that one or
+	  more descriptor completions are queued without reaching the count
+	  threshold. Range is 1-65535.
+
+config CRYPTO_DEV_FSL_CAAM_CRYPTO_API
+	tristate "Register algorithm implementations with the Crypto API"
+	depends on CRYPTO_DEV_FSL_CAAM && CRYPTO_DEV_FSL_CAAM_JR
+	default y
+	select CRYPTO_ALGAPI
+	select CRYPTO_AUTHENC
+	help
+	  Selecting this will offload crypto for users of the
+	  scatterlist crypto API (such as the linux native IPSec
+	  stack) to the SEC4 via job ring.
+
+	  To compile this as a module, choose M here: the module
+	  will be called caamalg.
+
+config CRYPTO_DEV_FSL_CAAM_AHASH_API
+	tristate "Register hash algorithm implementations with Crypto API"
+	depends on CRYPTO_DEV_FSL_CAAM && CRYPTO_DEV_FSL_CAAM_JR
+	default y
+	select CRYPTO_HASH
+	help
+	  Selecting this will offload ahash for users of the
+	  scatterlist crypto API to the SEC4 via job ring.
+
+	  To compile this as a module, choose M here: the module
+	  will be called caamhash.
+
+config CRYPTO_DEV_FSL_CAAM_RNG_API
+	tristate "Register caam device for hwrng API"
+	depends on CRYPTO_DEV_FSL_CAAM && CRYPTO_DEV_FSL_CAAM_JR
+	default y
+	select CRYPTO_RNG
+	select HW_RANDOM
+	help
+	  Selecting this will register the SEC4 hardware rng to
+	  the hw_random API for suppying the kernel entropy pool.
+
+	  To compile this as a module, choose M here: the module
+	  will be called caamrng.
+
+config CRYPTO_DEV_FSL_CAAM_RNG_TEST
+	boolean "Test caam rng"
+	depends on CRYPTO_DEV_FSL_CAAM_RNG_API
+	default n
+	help
+	  Selecting this will enable a self-test to run for the
+	  caam RNG. This test is several minutes long and executes
+	  just before the RNG is registered with the hw_random API.
+
+config CRYPTO_DEV_FSL_CAAM_SM
+	tristate "CAAM Secure Memory / Keystore API (EXPERIMENTAL)"
+	default n
+	help
+	  Enables use of a prototype kernel-level Keystore API with CAAM
+	  Secure Memory for insertion/extraction of bus-protected secrets.
+
+config CRYPTO_DEV_FSL_CAAM_SM_SLOTSIZE
+	int "Size of each keystore slot in Secure Memory"
+	depends on CRYPTO_DEV_FSL_CAAM_SM
+	range 5 9
+	default 7
+	help
+	  Select size of allocation units to divide Secure Memory pages into
+	  (the size of a "slot" as referenced inside the API code).
+	  Established as powers of two.
+	  Examples:
+		5 => 32 bytes
+		6 => 64 bytes
+		7 => 128 bytes
+		8 => 256 bytes
+		9 => 512 bytes
+
+config CRYPTO_DEV_FSL_CAAM_SM_TEST
+	tristate "CAAM Secure Memory - Keystore Test/Example (EXPERIMENTAL)"
+	depends on CRYPTO_DEV_FSL_CAAM_SM
+	default n
+	help
+	  Example thread to exercise the Keystore API and to verify that
+	  stored and recovered secrets can be used for general purpose
+	  encryption/decryption.
+
+config CRYPTO_DEV_FSL_CAAM_SECVIO
+	tristate "CAAM/SNVS Security Violation Handler (EXPERIMENTAL)"
+	depends on CRYPTO_DEV_FSL_CAAM
+	default n
+	help
+	  Enables installation of an interrupt handler with registrable
+          handler functions which can be specified to act on the consequences
+          of a security violation.
+
+config CRYPTO_DEV_FSL_CAAM_DEBUG
+	bool "Enable debug output in CAAM driver"
+	depends on CRYPTO_DEV_FSL_CAAM
+	default n
+	help
+	  Selecting this will enable printing of various debug
+	  information in the CAAM driver.

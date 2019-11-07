@@ -1,0 +1,238 @@
+From 4585426826cf90f529ec966805858b75a45caf50 Mon Sep 17 00:00:00 2001
+From: pengjie <jiejie.128@163.com>
+Date: Fri, 20 Sep 2019 23:24:09 +0800
+Subject: [PATCH 08/13] =?UTF-8?q?1.=E4=BF=AE=E6=94=B9=E8=AE=BE=E5=A4=87?=
+ =?UTF-8?q?=E6=A0=91,=E9=BB=98=E8=AE=A4=E6=94=AF=E6=8C=81sd=E5=8D=A1?=
+ =?UTF-8?q?=E5=92=8Cnand=E5=90=AF=E5=8A=A8=EF=BC=9B=202.=E6=B7=BB=E5=8A=A0?=
+ =?UTF-8?q?=E4=B8=B2=E5=8F=A33=E7=9A=84=E9=85=8D=E7=BD=AE=E9=A1=B9?=
+ =?UTF-8?q?=E3=80=82?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: pengjie <jiejie.128@163.com>
+---
+ arch/arm/boot/dts/Makefile                    |  1 -
+ arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts  |  4 ++
+ .../dts/imx6ull-14x14-evk-gpmi-weim-43.dts    |  2 +-
+ .../imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts |  2 +-
+ .../dts/imx6ull-14x14-evk-gpmi-weim-hdmi.dts  |  2 +-
+ .../dts/imx6ull-14x14-evk-gpmi-weim-wifi.dts  |  2 +-
+ .../boot/dts/imx6ull-14x14-evk-gpmi-weim.dts  |  4 +-
+ arch/arm/boot/dts/imx6ull-14x14-evk.dts       | 52 +++++++++++++++----
+ 8 files changed, 53 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index 974d5c1c9524..d4c8af8ee706 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -401,7 +401,6 @@ dtb-$(CONFIG_SOC_IMX6ULL) += \
+ 	imx6ull-14x14-evk.dtb \
+ 	imx6ull-14x14-evk-btwifi.dtb \
+ 	imx6ull-14x14-evk-emmc.dtb \
+-	imx6ull-14x14-evk-gpmi-weim.dtb \
+ 	imx6ull-14x14-evk-gpmi-weim-43.dtb \
+ 	imx6ull-14x14-evk-emmc-43.dtb \
+ 	imx6ull-14x14-evk-gpmi-weim-hdmi.dtb \
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts
+index 4ea3d91e2cb6..8f179a4c6755 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-emmc.dts
+@@ -8,6 +8,10 @@
+ 
+ #include "imx6ull-14x14-evk.dts"
+ 
++&gpmi {
++	status = "disable";
++};
++
+ &usdhc2 {
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-43.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-43.dts
+index 47293ba60d60..5a98a8a28bd8 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-43.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-43.dts
+@@ -6,7 +6,7 @@
+  * published by the Free Software Foundation.
+  */
+ 
+-#include "imx6ull-14x14-evk-gpmi-weim.dts"
++#include "imx6ull-14x14-evk.dts"
+ 
+ &lcdif {
+ 	pinctrl-names = "default";
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts
+index 568035b858df..5d2482db1567 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-cam-18b20.dts
+@@ -6,7 +6,7 @@
+  * published by the Free Software Foundation.
+  */
+ 
+-#include "imx6ull-14x14-evk-gpmi-weim.dts"
++#include "imx6ull-14x14-evk.dts"
+ 
+ / {
+ 	pwm_leds{
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-hdmi.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-hdmi.dts
+index 0d24b79655f4..21adfb8a11df 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-hdmi.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-hdmi.dts
+@@ -6,7 +6,7 @@
+  * published by the Free Software Foundation.
+  */
+ 
+-#include "imx6ull-14x14-evk-gpmi-weim.dts"
++#include "imx6ull-14x14-evk.dts"
+ 
+ &lcdif {
+ 	pinctrl-names = "default";
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-wifi.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-wifi.dts
+index 4ab23266ca95..921377876810 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-wifi.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim-wifi.dts
+@@ -5,5 +5,5 @@
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+  */
+-#include "imx6ull-14x14-evk-gpmi-weim.dts"
++#include "imx6ull-14x14-evk.dts"
+ #include "imx6ul-evk-btwifi.dtsi"
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts
+index 924696ee6d7d..3ba230f69025 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk-gpmi-weim.dts
+@@ -10,14 +10,14 @@
+ 
+ &gpmi {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_gpmi_nand_1>;
++	pinctrl-0 = <&pinctrl_gpmi_nand>;
+ 	status = "okay";
+ 	nand-on-flash-bbt;
+ };
+ 
+ &iomuxc {
+ 	imx6ull-evk-gpmi-rework {
+-		pinctrl_gpmi_nand_1: gpmi-nand-1 {
++		pinctrl_gpmi_nand: gpmi-nand {
+ 			fsl,pins = <
+ 				MX6UL_PAD_NAND_CLE__RAWNAND_CLE         0xb0b1
+ 				MX6UL_PAD_NAND_ALE__RAWNAND_ALE         0xb0b1
+diff --git a/arch/arm/boot/dts/imx6ull-14x14-evk.dts b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+index a029e6db0eca..8e779f39c834 100644
+--- a/arch/arm/boot/dts/imx6ull-14x14-evk.dts
++++ b/arch/arm/boot/dts/imx6ull-14x14-evk.dts
+@@ -529,6 +529,26 @@
+ &iomuxc {
+ 	pinctrl-names = "default";
+ 	imx6ul-evk {
++		pinctrl_gpmi_nand: gpmi-nand {
++			fsl,pins = <
++				MX6UL_PAD_NAND_CLE__RAWNAND_CLE         0xb0b1
++				MX6UL_PAD_NAND_ALE__RAWNAND_ALE         0xb0b1
++				MX6UL_PAD_NAND_WP_B__RAWNAND_WP_B       0xb0b1
++				MX6UL_PAD_NAND_READY_B__RAWNAND_READY_B 0xb000
++				MX6UL_PAD_NAND_CE0_B__RAWNAND_CE0_B     0xb0b1
++				MX6UL_PAD_NAND_CE1_B__RAWNAND_CE1_B     0xb0b1
++				MX6UL_PAD_NAND_RE_B__RAWNAND_RE_B       0xb0b1
++				MX6UL_PAD_NAND_WE_B__RAWNAND_WE_B       0xb0b1
++				MX6UL_PAD_NAND_DATA00__RAWNAND_DATA00   0xb0b1
++				MX6UL_PAD_NAND_DATA01__RAWNAND_DATA01   0xb0b1
++				MX6UL_PAD_NAND_DATA02__RAWNAND_DATA02   0xb0b1
++				MX6UL_PAD_NAND_DATA03__RAWNAND_DATA03   0xb0b1
++				MX6UL_PAD_NAND_DATA04__RAWNAND_DATA04   0xb0b1
++				MX6UL_PAD_NAND_DATA05__RAWNAND_DATA05   0xb0b1
++				MX6UL_PAD_NAND_DATA06__RAWNAND_DATA06   0xb0b1
++				MX6UL_PAD_NAND_DATA07__RAWNAND_DATA07   0xb0b1
++			>;
++		};
+ 		pinctrl_remote_control: remote_control {
+ 			fsl,pins = <
+ 				MX6UL_PAD_UART2_RX_DATA__GPIO1_IO21	0x000010B1 /* remote control        add by pengjie 20190703*/
+@@ -698,7 +718,6 @@
+ 			>;
+ 		};
+ 
+-		/* delete by pengjie*/
+ 		pinctrl_uart1: uart1grp {
+ 			fsl,pins = <
+ 				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX 0x1b0b1
+@@ -713,6 +732,13 @@
+ 			>;
+ 		};
+ 
++		pinctrl_uart3: uart3grp {
++			fsl,pins = <
++				MX6UL_PAD_UART3_TX_DATA__UART3_DCE_TX	0x1b0b1
++				MX6UL_PAD_UART3_RX_DATA__UART3_DCE_RX	0x1b0b1
++			>;
++		};
++
+ 		pinctrl_uart2dte: uart2dtegrp {
+ 			fsl,pins = <
+ 				MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x1b0b1
+@@ -818,13 +844,6 @@
+ 				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7 0x170f9
+ 			>;
+ 		};
+-                /*    add by pengjie 0717
+-		pinctrl_wdog: wdoggrp {
+-			fsl,pins = <
+-				MX6UL_PAD_LCD_RESET__WDOG1_WDOG_ANY    0x30b0
+-			>;
+-		};
+-		*/
+ 
+ 		pinctrl_tsc_reset: tscresetgrp {
+ 			fsl,pins = <
+@@ -836,7 +855,7 @@
+ 		pinctrl_onewire: onewire {
+ 			fsl,pins = <
+ 				//MX6UL_PAD_GPIO1_IO02__GPIO1_IO02          0x000090B1     DHT11
+-				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02          0x4001b8b1
++				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02          0x400138B1
+ 			>;
+ 		};
+ 
+@@ -858,6 +877,7 @@
+ 			>;
+ 		};
+ */
++
+ 	};
+ };
+ 
+@@ -1087,6 +1107,13 @@
+ 	status = "disable";
+ };
+ 
++&uart3{
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart3>;
++	status = "okay";
++};
++
++
+ &usbotg1 {
+ 	dr_mode = "otg";
+ 	srp-disable;
+@@ -1125,7 +1152,14 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_usdhc2>;
+ 	non-removable;
++	status = "disable";
++};
++
++&gpmi {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_gpmi_nand>;
+ 	status = "okay";
++	nand-on-flash-bbt;
+ };
+ 
+ /*
+-- 
+2.17.1
+
