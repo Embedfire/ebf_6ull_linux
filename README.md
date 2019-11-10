@@ -13,6 +13,14 @@ sudo apt-get install gcc-arm-linux-gnueabihf
 
 ## 内核编译过程
 
+**导出环境变量**
+
+```bash
+export PATH=/opt/arm-gcc/bin:$PATH
+export ARCH=arm 
+export CROSS_COMPILE=arm-linux-gnueabihf- 
+```
+
 **清除编译信息**
 
 ```bash
@@ -44,6 +52,13 @@ ebf_6ull_linux/arch/arm/boot
 ebf_6ull_linux/arch/arm/boot/dts
 ```
 
+**拷贝zImage与dtb**
+
+可以直接运行脚本`copy.sh`将内核镜像与设备树拷贝到`image`目录下
+
+```bash
+./copy.sh
+```
 
 ## 只编译设备树
 在后面添加 `dtbs` 即可

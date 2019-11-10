@@ -1,0 +1,4 @@
+*.dtb
+*.o
+image
+my_lib
