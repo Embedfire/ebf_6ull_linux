@@ -6,10 +6,25 @@
 
 **安装独立编译工具链**
 
-arm-linux-gnueabihf-gcc：v7.4.0
+1. 命令安装方式（推荐新手使用这种方法）：
+
+arm-linux-gnueabihf-gcc：`v7.4.0`
 ```bash
 sudo apt-get install gcc-arm-linux-gnueabihf
 ```
+
+2. 安装包安装方式(推荐老手使用这种方法)
+
+从百度云盘下载`arm-linux-gnueabihf-gcc`编译器的压缩包，版本是 `v4.9.3`
+
+链接：[https://pan.baidu.com/s/1g5NiXLwYYEo52iARnCbG3w](https://pan.baidu.com/s/1g5NiXLwYYEo52iARnCbG3w) 提取码：`u2ri`
+
+在 `i.MX6ULL系列\5-编译工具链\arm-gcc` 目录下找到 `arm-gcc.tar.gz` 压缩包并且下载
+
+安装方法参考：[https://blog.csdn.net/u013485792/article/details/50958253](https://blog.csdn.net/u013485792/article/details/50958253)
+
+> 作者备注：为什么推荐更低版本的编译器呢？因为作者亲测新版本的编译器并不能完全兼容，在测试比如新版本编译的内核镜像无法识别到4G模块。但是在绝大部分情况下`v7.4.0`版本的编译器都是没有任何问题的！！！请放心使用！！！
+
 
 ## 内核编译过程
 
