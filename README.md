@@ -97,6 +97,15 @@ make ARCH=arm -j10 CROSS_COMPILE=arm-linux-gnueabihf- dtbs
 - imx6ull-14x14-evk-gpmi-weim-cam-dht11.dts 
 - imx6ull-14x14-evk-emmc-cam-dht11.dts
 
+---
+## 骚气的一键编译
+```
+./build.sh
+```
+
+生成的内核镜像与设备树均被拷贝到 `image` 目录下。
+内核模块相关均被安装到 `my_lib/lib/` 目录下的`modules`文件夹下，可以直接替换掉`rootfs(根文件系统)`中的`/lib/modules/`。
+
 
 ## make menuconfig配置选项（部分）
 

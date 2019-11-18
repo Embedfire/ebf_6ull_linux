@@ -24,9 +24,9 @@
 
 			timing0: timing0 {
 			mode_name = "hdmi";
-			clock-frequency = <27000000>;
-			hactive = <1360>;
-			vactive = <768>;
+			clock-frequency = <74250000>;
+			hactive = <1280>;
+			vactive = <720>;
 			hfront-porch = <8>;
 			hback-porch = <2>;
 			hsync-len = <41>;
@@ -46,7 +46,7 @@
 &i2c1 {
 
 	gt9xx@5d {
-		touchscreen-size-x = <1360>;
-		touchscreen-size-y = <768>;
+		touchscreen-size-x = <1280>;
+		touchscreen-size-y = <720>;
 	};
 };
