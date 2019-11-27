@@ -99,13 +99,25 @@ make ARCH=arm -j10 CROSS_COMPILE=arm-linux-gnueabihf- dtbs
 
 ---
 ## 骚气的一键编译
+直接运行以下命令
 ```
 ./build.sh
+```
+
+或者...
+
+```
+./build.sh 5.0
 ```
 
 生成的内核镜像与设备树均被拷贝到 `image` 目录下。
 内核模块相关均被安装到 `my_lib/lib/` 目录下的`modules`文件夹下，可以直接替换掉`rootfs(根文件系统)`中的`/lib/modules/`。
 
+`build.sh`脚本默认编译5.0寸屏幕的内核镜像，如果需要4.3寸屏幕的内核镜像，则可以使用以下命令去编译:
+
+```
+./build.sh 4.3
+```
 
 ## make menuconfig配置选项（部分）
 
