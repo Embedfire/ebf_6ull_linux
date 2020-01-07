@@ -4,6 +4,11 @@
 
 **ubuntu18.04**
 
+**安装lzop**
+```bash
+sudo apt-get install lzop
+```
+
 **安装独立编译工具链**
 
 1. 命令安装方式（推荐新手使用这种方法）：
@@ -17,7 +22,7 @@ sudo apt-get install gcc-arm-linux-gnueabihf
 
 从百度云盘下载`arm-linux-gnueabihf-gcc`编译器的压缩包，版本是 `v4.9.3`
 
-链接：[https://github.com/Embdefire/products/wiki](https://github.com/Embdefire/products/wiki) 
+链接：[https://github.com/Embedfire/products/wiki](https://github.com/Embedfire/products/wiki) 
 
 在 **Linux系列产品** 中找到的网盘链接，在`i.MX6ULL系列\5-编译工具链\arm-gcc` 目录下找到 `arm-gcc.tar.gz` 压缩包并且下载
 
@@ -206,6 +211,10 @@ Location:
 ```
 
 ---
+
+## 常见的编译错误及解决方法
+
+查看wiki：[https://github.com/Embedfire/ebf_6ull_linux/wiki](https://github.com/Embedfire/ebf_6ull_linux/wiki)
 
 ## 其他信息
 
