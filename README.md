@@ -4,9 +4,9 @@
 
 **ubuntu18.04**
 
-**安装lzop**
+**安装必要的库**
 ```bash
-sudo apt-get install lzop
+sudo apt-get install lzop libncurses5-dev
 ```
 
 **安装独立编译工具链**
@@ -124,7 +124,9 @@ make ARCH=arm -j10 CROSS_COMPILE=arm-linux-gnueabihf- dtbs
 ./build.sh 4.3
 ```
 
-## make menuconfig配置选项（部分）
+## 配置选项（部分）
+
+运行 `make ARCH=arm menuconfig` 命令打开配置界面，根据自身需求配置即可！
 
 **触摸屏驱动：**
 ```bash
