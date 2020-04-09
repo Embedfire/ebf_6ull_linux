@@ -3,3 +3,5 @@
 image
 my_lib
 .lcdsize
+.config
+.version
