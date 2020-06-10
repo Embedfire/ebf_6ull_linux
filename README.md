@@ -22,9 +22,9 @@ sudo apt-get install gcc-arm-linux-gnueabihf
 
 从百度云盘下载`arm-linux-gnueabihf-gcc`编译器的压缩包，版本是 `v4.9.3`
 
-链接：[https://github.com/Embedfire/products/wiki](https://github.com/Embedfire/products/wiki) 
+链接：https://ebf-products.readthedocs.io/zh_CN/latest/linux/ebf_i.mx6ull.html
 
-在 **Linux系列产品** 中找到的网盘链接，在`i.MX6ULL系列\5-编译工具链\arm-gcc` 目录下找到 `arm-gcc.tar.gz` 压缩包并且下载
+在 **Linux系列产品** 中找到综合资料网盘链接 ，在`i.MX6ULL系列\5-编译工具链\arm-gcc` 目录下找到 `arm-gcc.tar.gz` 压缩包并且下载
 
 安装方法参考：[https://blog.csdn.net/u013485792/article/details/50958253](https://blog.csdn.net/u013485792/article/details/50958253)
 
